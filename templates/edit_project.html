@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/edit_project.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+</head>
+<body>
+    <header>
+        <div style="display: none;">
+            <ion-icon name="person"></ion-icon>
+            <ion-icon name="log-out"></ion-icon>
+        </div>
+        <div class="container">
+            <!-- Title -->
+            <a href="/" class="back-to-dashboard">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <!-- Project Overview Section -->
+            <h1>Edit Project: {{ project['ProjectName'] }}</h1>
+            <div class="navigation">
+                <div class="user-box">
+                    <div class="image-box">
+                        <img src="/static/profile-user.png" alt="avatar">
+                    </div>
+                    <p class="username">{{ session['user_name'] }}</p>
+                </div>
+                <div class="menu-toggle"></div>
+                <ul class="menu">
+                    <li>
+                      <a href="/profile" class="icon-link">
+                        <ion-icon class="menu-icon" name="person-outline" data-filled="person"></ion-icon>Profile
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/logout" class="icon-link">
+                        <ion-icon class="menu-icon" name="log-out-outline" data-filled="log-out"></ion-icon>Logout
+                      </a>
+                    </li>
+                  </ul>   
+                <script>
+                    document.addEventListener("DOMContentLoaded", () => {
+                        const navigation = document.querySelector('.navigation');
+                        const menuToggle = document.querySelector('.menu-toggle');
+                        menuToggle.addEventListener('click', () => {
+                            navigation.classList.toggle('active');
+                        });
+            
+                        const icons = document.querySelectorAll(".menu-icon");
+                        icons.forEach((icon) => {
+                            const filledIcon = icon.getAttribute("data-filled"); 
+                            const outlineIcon = icon.getAttribute("name"); 
+                            icon.parentElement.addEventListener("mouseenter", () => {
+                                icon.setAttribute("name", filledIcon);
+                            });
+                            icon.parentElement.addEventListener("mouseleave", () => {
+                                icon.setAttribute("name", outlineIcon);
+                            });
+                        });
+                    });
+                </script> 
+            </div>
+        </div>
+    </header>
+    <section id="edit-project">
+        <div class="form-container">
+            <h2>Update Project Details</h2>
+            <form action="/project/update/{{ project['ProjectID'] }}" method="POST">
+                <!-- Form Row 1 -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name"><i class="fas fa-project-diagram"></i> Project Name:</label>
+                        <input type="text" id="name" name="name" value="{{ project['ProjectName'] }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product_owner"><i class="fas fa-user"></i> Product Owner:</label>
+                        <select id="product_owner" name="product_owner_id" required>
+                            <option value="">Select Product Owner</option>
+                            {% for owner in product_owners %}
+                                <option value="{{ owner.ProductOwnerID }}" {% if owner.ProductOwnerID == project['ProductOwnerID'] %}selected{% endif %}>
+                                    {{ owner.Name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Form Row 2 -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start_date"><i class="fas fa-calendar-alt"></i> Start Date:</label>
+                        <input type="date" id="start_date" name="start_date" value="{{ project['StartDate'] }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date"><i class="fas fa-calendar-check"></i> End Date:</label>
+                        <input type="date" id="end_date" name="end_date" value="{{ project['EndDate'] }}" required>
+                    </div>
+                </div>
+
+                <!-- Form Row 3 -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="revised_date"><i class="fas fa-calendar"></i> Revised End Date (optional):</label>
+                        <input type="date" id="revised_date" name="revised_date" value="{{ project['RevisedEndDate'] }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="status"><i class="fas fa-info-circle"></i> Status:</label>
+                        <select id="status" name="status" required>
+                            <option value="Active" {% if project['Status'] == 'Active' %}selected{% endif %}>Active</option>
+                            <option value="On Hold" {% if project['Status'] == 'On Hold' %}selected{% endif %}>On Hold</option>
+                            <option value="Completed" {% if project['Status'] == 'Completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                    <a href="/" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</body>
+</html>

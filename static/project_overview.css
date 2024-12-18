@@ -1,0 +1,815 @@
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+	background-attachment:fixed;
+    transition: background-image 0.5s ease-in-out, background-color 0.5s ease-in-out;
+	height: 100vh;
+    padding-top: 12vh;
+}
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+h1, h2, h3{
+    font-size: 17px; 
+}
+th, td {
+    font-size: 14px; 
+}
+th i {
+    font-size: 12px; 
+    cursor: pointer;
+    color: #333; /* Black for sorting icons */
+    transition: color 0.3s ease;
+}
+/* Header Styling */
+header {
+    background-color: #1a202c;
+    color: #f7fafc;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+#header-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+header h1 {
+    flex: 1;
+    text-align: center;
+    font-size: 1.8rem;
+    margin: 0;
+    color: #edf2f7;
+}
+
+.back-to-dashboard {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 25px;
+    background-color: #2d3748;
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.back-to-dashboard:hover {
+    background-color: #4a5568;
+    transform: scale(1.03); /* Zoom in on hover */
+}
+
+.back-to-dashboard:active {
+    background-color: #2c3e50;
+    transform: scale(1); /* Revert to original size when clicked */
+}
+
+/* Project Header */
+.project-header {
+    text-align: center;
+    font-size: 2rem;
+    color: #ffffff;
+}
+
+/* User Stories Table */
+#user-stories {
+    min-width: 46%;
+    background: rgba(255, 255, 255, 0.322);
+    border-radius: 1rem;
+    backdrop-filter: blur(1px);
+    border-spacing: 0;
+    padding: 10px; 
+    box-sizing: border-box; 
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+[data-theme="dark"] #user-stories {
+    background: rgba(54, 52, 52, 0.384);
+    color: wheat;
+}
+.user-story-column {
+    max-width: 25ch; /* Display only 50 characters */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer; /* Indicate interactivity */
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+    position: relative;
+}
+.user-story-column:hover {
+    white-space: normal;
+    background-color: rgba(0, 0, 0, 0.1); /* Highlight on hover */
+    padding: 10px;
+    border-radius: 4px;
+    z-index: 10; /* Bring above other elements */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for emphasis */
+    position: relative;
+}
+#user-stories th, #user-stories td {
+    text-align: left; 
+    vertical-align: middle; 
+    text-align: left;
+    padding: 6px 4px; /* Reduce the padding to make the cells tighter */
+    border: none;
+}
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    #user-stories {
+        width: 100%; /* Make full-width for small screens */
+        margin-left: 0;
+    }
+}
+#user-stories table {
+    width: 100%;
+    font-size: 0.9rem;
+    border-collapse: collapse;
+    background-color: var(--table-bg);
+    color: var(--table-text);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+	border-radius:8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #111;
+    border-radius: 1rem;
+    backdrop-filter: blur(8px);
+    margin: 0;
+}
+/* Left-indent the text in the "User Story" column */
+#user-stories td:nth-child(1) {
+    text-align: left; /* Align text to the left */
+    padding-left: 10px; /* Add some left padding for indentation */
+}
+#user-stories th, #user-stories td {
+    text-align: center; 
+    vertical-align: middle; 
+}
+
+table tr:first-child th:first-child {
+    border-top-left-radius: 8px;
+}
+table tr:first-child th:last-child {
+    border-top-right-radius: 8px;
+}
+table tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+table tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+#user-stories th {
+    text-align: center; 
+    background-color: #1a202c;
+    color: var(--header-text);
+    font-weight: 700;
+}
+
+/* Sprint Calendar Table */
+
+#sprint-calendar {
+    min-width: 46%;
+    background: rgba(255, 255, 255, 0.322);
+    border-radius: 1rem;
+    backdrop-filter: blur(1px);
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--table-text);
+}
+[data-theme="dark"] #sprint-calendar {
+    background: rgba(54, 52, 52, 0.384);
+    color: wheat;
+}
+
+#sprint-calendar table {
+    min-width: 46%;
+    font-size: 0.9rem;
+    border-collapse: collapse;
+    background-color: var(--table-bg);
+    color: var(--table-text);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #111;
+    border-radius: 1rem;
+    backdrop-filter: blur(8px);
+    width: 100%; 
+    margin: 0;
+}
+
+#sprint-calendar th, #sprint-calendar td {
+    padding: 8px 12px;
+    /* border: 1px solid var(--stat-border); */
+    text-align: center;
+}
+
+#sprint-calendar th {
+    text-align: center; 
+    background-color: #1a202c; /* Change from green to black */
+    /* color: #fffb00; */
+    color: var(--header-text);
+}
+
+#sprint-calendar tr:nth-child(even) {
+    /* background-color: var(--stat-bg); */
+    background: rgba(255, 255, 255, 0.05);
+    color: #070606;
+}
+
+/* Header and Section Styling Adjustments */
+.project-manager-section {
+    min-width: 46%;
+    overflow: hidden;
+    display: inline-block;
+    font-size: 1.1rem;
+    padding-left: 2%;
+    background: rgba(255, 255, 255, 0.322);
+    border-radius: 1rem;
+    backdrop-filter: blur(1px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+[data-theme="dark"] .project-manager-section{
+    background: rgba(54, 52, 52, 0.384);
+    color:wheat;
+}
+#user-stories, #sprint-calendar, .project-manager-section{
+    margin: 10px 10px 10px 10px;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    #header-content {
+        justify-content: center;
+    }
+
+    #user-greeting {
+        font-size: 1.2rem;
+        margin-top: 10px;
+    }
+
+    .back-to-dashboard {
+        padding: 0.5rem 1rem;
+    }
+
+    .project-header {
+        font-size: 1.5rem;
+    }
+
+    #user-stories table, #sprint-calendar table {
+        width: 100%;
+        margin: 0;
+    }
+
+    #user-stories, #sprint-calendar {
+        margin-left: 0;
+        margin-top: 20px;
+    }
+}
+
+/* Green text for positive days remaining */
+.days-remaining.green {
+    font-size: 14px;
+    font-weight: bold;
+    color: green;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+/* Red text for negative days remaining */
+.days-remaining.red {
+    font-size: 14px;
+    font-weight: bold;
+    color: rgb(228, 33, 33);
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+/* ////////////////////////////////////////////////////////////////////////////////////////////// */
+:root {
+    --bg-color: #f4f7fc;
+    --text-color: #333;
+    --header-bg: #1a202c;
+    --header-text: #f0f3f5;
+    --stat-bg: white;
+    --stat-border: #ddd;
+    --table-bg: rgb(255, 255, 255);
+    --table-text: #333;
+    --icon-text-color: #333;
+    background: linear-gradient(260deg, #d4a5b6, #9dbbd4);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+
+[data-theme="dark"] {
+    --bg-color: #252830;
+    --text-color: wheat;
+    --header-bg: #252830;
+    --header-text: wheat;
+    --stat-bg: #21252e;
+    --stat-border: #555;
+    --table-bg: #212938;
+    --table-text: wheat;
+    --icon-text-color: wheat;
+    /* background: linear-gradient(260deg, #0F2027, #203A43); */
+    background-image: linear-gradient(135deg, #371c50 0%, #234558 100%);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+/* Calendar Popup Styling */
+.theme-popup {
+    display: none;
+    position: absolute;
+    background: var(--popup-bg, var(--stat-bg)); /* Default to stat-bg from your theme variables */
+    border: 1px solid var(--popup-border, var(--stat-border));
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Adjust Colors for Light Theme */
+[data-theme="light"] .theme-popup {
+    --popup-bg: var(--stat-bg);
+    --popup-border: var(--stat-border);
+}
+
+/* Adjust Colors for Dark Theme */
+[data-theme="dark"] .theme-popup {
+    --popup-bg: var(--stat-bg);
+    --popup-border: var(--stat-border);
+}
+
+/* ///////////////////////////////////////////////////////////////////////////////////////////// */
+/* Form controls inside tables */
+select {
+    padding: 5px;
+    font-size: 14px; 
+    border: none; 
+    background-color: #f9f9f9;
+    color: #333;
+    transition: background-color 0.3s;
+    border-radius: 4px;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* General Table Styles */
+.project-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    border-radius: 8px 8px 0 0;
+}
+
+.project-table th, .project-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.project-table th {
+    background-color: #f4f4f4;
+}
+
+.status-row {
+    transition: background-color 0.3s ease; /* Smooth transition for color change */
+}
+.status-row td {
+    transition: background-color 0.3s ease;
+}
+
+.start-date, .end-date{
+    text-align: center;
+    padding: 5px;
+    width: 90%;
+    font-size: 13px; 
+    border: none; 
+    background-color: #f9f9f9;
+    color: #333;
+    transition: background-color 0.3s;
+    border-radius: 4px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.sprint-input {
+    max-width: 4ch;
+    padding: 5px;
+    font-size: 14px; 
+    border: none; 
+    background-color: #f9f9f9;
+    color: #333;
+    transition: background-color 0.3s;
+    border-radius: 4px;
+    font-family: 'Roboto', sans-serif;
+    text-align: center;
+}
+.assignee-dropdown{
+    max-width: 10ch;
+}
+.moscow-dropdown{
+    max-width: 6ch;
+}
+/* /////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+#main-content {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#left-section {
+    min-width:45%;
+    flex: 2; 
+    display: flex;
+    flex-direction: column;
+    transition: width 0.5s ease;
+}
+
+#right-section {
+    margin: 10px;
+    width: 48%; 
+    flex-direction: column; 
+    background: rgba(255, 255, 255, 0.322);
+    border-radius: 1rem;
+    backdrop-filter: blur(1px);
+    padding: 10px; 
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: width 0.5s ease;
+}
+[data-theme="dark"] #right-section {
+    background: rgba(54, 52, 52, 0.384);
+    color: wheat; 
+    border: 1px solid rgba(255, 255, 255, 0.356);
+}
+
+#chart-section {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+[data-theme="dark"] #chart-section {
+    background: rgba(27, 27, 27, 0.384);
+    color: wheat; 
+    border: 1px solid rgba(255, 255, 255, 0.356);
+}
+
+#chart-section.expanded {
+    width: 90%;
+    height: 90vh;
+    position: fixed;
+    top: 5%;
+    left: 5%;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.8); /* Dimmed background when expanded */
+    padding: 20px;
+}
+
+.expand-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #11141a;
+    background: white;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.301);
+    z-index: 1100;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.expand-icon:hover {
+    transform: scale(1.2) ;  /* Slightly enlarge on hover */
+}
+/* //////////////////////////////////////////////////////////////////////////////////////////////// */
+    .theme-toggle {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 25px;
+        margin-left: 15px;
+    }
+    
+    .theme-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: 0.4s;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 19px;
+        width: 19px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        border-radius: 50%;
+        transition: 0.4s;
+    }
+    
+    input:checked + .slider {
+        background-color: #dfe20a;
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(25px);
+    }
+    
+    /* Sun and Moon Icons */
+    .sun-icon, .moon-icon {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+        color: #333;
+        transition: opacity 0.4s, color 0.4s;
+    }
+    
+    .sun-icon {
+        left: 6px;
+        opacity: 1;
+    }
+    
+    .moon-icon {
+        right: 6px;
+        opacity: 0;
+    }
+    
+    input:checked + .slider .sun-icon {
+        opacity: 0;
+    }
+    
+    input:checked + .slider .moon-icon {
+        opacity: 1;
+    }
+    
+    /* In Dark Mode, Update Icon Colors */
+    [data-theme="dark"] .sun-icon {
+        color: #fff;
+    }
+    
+    [data-theme="dark"] .moon-icon {
+        color: #000000;
+    }
+    
+/* ////////////////////////////////////////////////////////////////////////////////////////////// */
+select[disabled], input[readonly] {
+    background-color: #f0f0f0;
+    color: #888;
+    cursor: not-allowed;
+}
+/* //////////////////////////  Charts ///////////////////////////////////////////////////// */
+[data-theme='dark'] #charts-section h4,
+[data-theme='dark'] #charts-section h3 {
+    color: rgb(37, 34, 34); /* Set specific color for titles in dark theme */
+}
+
+/* Ensure chart container text (inside the canvas or control) remains unchanged */
+[data-theme='dark'] .chart-container {
+    color: white; /* Default white text color for the chart container in dark theme */
+}
+
+/* General chart container styles */
+.chart-container {
+    position: relative;
+    overflow: visible; /* Allow content to overflow when expanded */
+    z-index: 1; 
+    background-color: white; /* Optional: Consistent background */
+    border-radius: 8px; /* Optional: Rounded corners */
+    padding: 10px; /* Optional: Add space inside container */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle shadow */
+    transition: width 0.3s ease, height 0.3s ease;
+}
+#charts-section {
+    display: grid; /* Use CSS Grid */
+    grid-template-columns: repeat(2, 1fr); /* 2 columns, each takes 1 fraction of the available space */
+    gap: 20px; /* Space between grid items */
+    margin: 0 auto; 
+}
+canvas {
+    width: auto; /* Default full width */
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease; /* Transition on expand */
+    object-fit: contain; /* Ensure the chart scales proportionally */
+}
+/* When a chart is expanded */
+.chart-container.large {
+    position: fixed; /* Take the chart out of the flow */
+    top: 25%; 
+    transform: translate(-50%, -50%); /* Center the chart properly */
+    width: 80vw;
+    height: 80vh; 
+    background-color: rgb(255, 255, 255); /* Ensure a white background */
+    z-index: 1000; /* Place on top of all other elements */
+    display: flex;
+    justify-content: center; 
+    /* align-items: center; */
+    border-radius: 8px; /* Optional: Make the expanded view look neat */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+.chart-container.large canvas {
+    width: 100% !important; /* Ensure the canvas fits the container */
+    height: 100% !important;
+    transform: none; /* Reset any scaling */
+}
+
+/* Container */
+.container {
+    position: fixed; /* Fixes the container at the top */
+    top: 0; /* Aligns it to the top */
+    left: 0; /* Aligns it to the left */
+    width: 100%; /* Full width */
+    height: 12vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+    background: rgb(3, 1, 1); /* Optional: Add a background for visibility */
+}
+.navigation {
+    position: fixed;
+    top: 8px;
+    right: 20px;
+    width: 120px;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 30px;
+    background: rgb(255, 255, 255);
+    overflow: hidden;
+    transition: height 0.5s, width 0.5s;
+    transition-delay: 0s, 0.5s;
+
+    background: rgba(243, 237, 237, 0.397); /* Transparent white */
+    backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
+    -webkit-backdrop-filter: blur(10px); /* For Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Semi-transparent border */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 
+                0 1px 3px rgba(0, 0, 0, 0.1); 
+  }
+  .navigation .username {
+    font-weight: 700; /* Bold weight */
+    }
+  
+  .navigation .user-box {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    transition: 0.4s;
+  }
+  
+  .navigation .user-box .username {
+    font-size: 1.2rem;
+    padding-left: 5%;
+    color: rgb(48, 45, 45);
+  }
+  
+  .navigation .user-box .image-box {
+    position: relative;
+    min-width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid white;
+  }
+  
+  .navigation .user-box .image-box img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .navigation .menu-toggle {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .navigation .menu-toggle::before {
+    content: "";
+    position: absolute;
+    width: 32px;
+    height: 2px;
+    background: gray;
+    transform: translateY(-10px);
+    box-shadow: 0 10px gray;
+    transition: 0.3s;
+  }
+  
+  .navigation .menu-toggle::after {
+    content: "";
+    position: absolute;
+    width: 32px;
+    height: 2px;
+    background: gray;
+    transform: translateY(10px);
+    transition: 0.3s;
+  }
+  
+  .menu {
+    position: absolute;
+    margin-top: 60px;
+    padding: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .menu li {
+    list-style: none;
+  }
+  
+  .menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+    font-size: 1rem;
+    text-decoration: none;
+    color: gray;
+  }
+  
+  .menu li a ion-icon {
+    font-size: 1.5rem;
+  }
+  
+  .menu li a:hover {
+    color: rgb(71, 5, 71);
+  }
+  
+  .navigation.active .menu-toggle::before {
+    transform: translateY(0px) rotate(45deg);
+    box-shadow: none;
+  }
+  
+  .navigation.active .menu-toggle::after {
+    transform: translateY(0px) rotate(-45deg);
+  }
+  
+  .navigation.active {
+    width: 250px;
+    height: 200px;
+    transition: width 0.5s, height 0.5s;
+    transition-delay: 0s, 0.5s;
+  }
+  
+  .navigation.active .user-box {
+    width: calc(100% - 60px);
+    transition-delay: 0s;
+  }
+  .menu-icon {
+    font-size: 1.5rem;
+    color: #555;
+    transition: transform 0.2s ease, color 0.2s ease; /* Faster transitions */
+  }

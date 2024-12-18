@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Details Form</title>
+    <style>
+    body {
+    background-color: #f0f4f8;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Form Container */
+.form-container {
+    width: 75%;
+    margin: 50px auto;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Header */
+h1 {
+    color: #4a90e2;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Labels */
+label {
+    color: #6c757d;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+/* Input Fields */
+input[type="text"], input[type="date"], input[type="number"], select, textarea {
+    border: 1px solid #d1d8e0;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1rem;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+/* Input Fields Focus */
+input[type="text"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+    border-color: #4a90e2;
+    background-color: #ffffff;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+    outline: none;
+}
+
+/* Buttons */
+button {
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Save Button */
+button.save {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+button.save:hover {
+    background-color: #218838;
+}
+
+/* Cancel Button */
+button.cancel {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+button.cancel:hover {
+    background-color: #c82333;
+}
+
+/* Spacing Between Fields */
+.form-group {
+    margin-bottom: 24px;
+}
+
+/* Back Button */
+.back-button {
+    background-color: #6c757d;
+    color: white;
+    border-radius: 8px;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+/* Flexbox Layout for Sprint and User Story Fields */
+.sprint-dropdown, .user-story-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Form Row Layout */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+/* Style for Dynamic Sprint and User Story Fields */
+.sprint-fields > div, .user-story-fields > div {
+    background-color: #f1f3f5;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.sprint-label, .user-story-label {
+    margin-top: 10px;
+    color: #495057;
+}
+
+.sprint-input, .user-story-input {
+    margin-bottom: 16px;
+}
+
+/* Hover Effects for Inputs and Selects */
+input[type="number"]:hover, textarea:hover, select:hover {
+    border-color: #80bdff;
+}
+
+/* Button Styles */
+button {
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem;
+    border-radius: 8px;
+    padding: 12px 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+
+    </style>
+</head>
+<body>
+   <div class="form-container">
+    <h1>Project Details</h1>
+    <form action="/create_project" method="POST">
+        
+        <!-- <div class="form-group">
+            <label for="ProjectID">Project ID</label>
+            <input type="text" id="ProjectID" name="ProjectID" required>
+        </div> -->
+        <div class="form-group">
+            <label for="ProjectName">Project Name</label>
+            <input type="text" id="ProjectName" name="ProjectName" required>
+        </div>
+        <!-- <div class="form-group">
+            <label for="project_description">Project Description</label>
+            <textarea id="project_description" name="project_description" rows="4" required></textarea>
+        </div> -->
+        <div class="form-group">
+            <label for="ProductOwnerID">Project Owner</label>
+            <select id="ProductOwnerID" name="ProductOwnerID" required>
+                <option value="">Select Owner</option>
+                {% for owner in product_owners %}
+                    <option value="{{ owner.ProductOwnerID }}">{{ owner.Name }}</option>
+                    {% endfor %}
+            </select>
+        </div>
+
+        <!-- Start, End, and Revised End Dates in the same row -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="StartDate">Start Date</label>
+                <input type="date" id="StartDate" name="StartDate" required>
+            </div>
+            <div class="form-group">
+                <label for="EndDate">End Date</label>
+                <input type="date" id="EndDate" name="EndDate" required>
+            </div>
+            <div class="form-group">
+                <label for="RevisedEndDate">Revised End Date</label>
+                <input type="date" id="RevisedEndDate" name="RevisedEndDate">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="Status">Status</label>
+            <select id="Status" name="Status" required>
+                <option value="">Select Status</option>
+                <option value="On Hold">On Hold</option>
+                <option value="Active">Active</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="TeamMembers">Team Members</label>
+            <select id="TeamMembers" name="TeamMembers" multiple required>
+                {% for member in team_members %}
+                    <option value="{{ member.UserID }}">{{ member.UserName }}</option>
+                {% endfor %}
+            </select>
+            <small>Hold down the Ctrl (Windows) or Command (Mac) key to select multiple team members.</small>
+        </div>
+        
+        
+
+        <!-- Sprint Fields -->
+        <div class="form-group">
+            <label for="sprintCount">Number of Sprints</label>
+            <!-- <input type="number" id="sprintCount" name="sprintCount" placeholder="Enter number of sprints" min="1" oninput="generateSprintFields()"> -->
+            <input type="number" id="sprintCount" name="sprint_count" placeholder="Enter number of sprints" min="1" oninput="generateSprintFields()">
+
+            <div id="sprintFields" class="sprint-fields"></div>
+        </div>
+
+        <!-- User Story Fields -->
+        <div class="form-group">
+            <label for="user_stories">Number of User Stories</label>
+            <!-- <input type="number" id="user_stories" name="user_stories" placeholder="Enter number of user stories" min="1" oninput="generateUserStoryFields()"> -->
+            <input type="number" id="user_stories" name="user_story_count" placeholder="Enter number of user stories" min="1" oninput="generateUserStoryFields()">
+
+            <div id="userStoryFields" class="user-story-fields"></div>
+        </div>
+
+        <button type="submit">Add Project</button>
+    </form>
+</div>
+
+
+    <script>
+        function generateSprintFields() {
+    const sprintCount = document.getElementById('sprintCount').value;
+    const sprintFieldsContainer = document.getElementById('sprintFields');
+    sprintFieldsContainer.innerHTML = '';
+
+    for (let i = 1; i <= sprintCount; i++) {
+        const sprintDiv = document.createElement('div');
+        sprintDiv.classList.add('sprint-group');
+                sprintDiv.innerHTML = `
+                    <p><strong>Sprint ${i}</strong></p>
+                    
+                    <div>
+                        <label>Scrum Master:</label>
+                        <select name="sprint_${i}_scrum_master" required>
+                            <option value="">Select Scrum Master</option>
+                            {% for scrum_master in scrum_masters %}
+                            <option value="{{ scrum_master.ScrumMasterID }}">{{ scrum_master.Email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Start Date:</label>
+                        <input type="date" name="sprint_${i}_start_date" required>
+                    </div>
+                    <div>
+                        <label>End Date:</label>
+                        <input type="date" name="sprint_${i}_end_date">
+                    </div>
+                    <div>
+                        <label>Status:</label>
+                        <select name="sprint_${i}_status" required>
+                            <option value="">Select Status</option>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                `;
+        sprintFieldsContainer.appendChild(sprintDiv);
+    }
+}
+
+
+
+        function generateUserStoryFields() {
+        const userStoryCount = document.getElementById('user_stories').value;
+        const userStoryFieldsContainer = document.getElementById('userStoryFields');
+        userStoryFieldsContainer.innerHTML = '';
+
+        for (let i = 1; i <= userStoryCount; i++) {
+            const storyDiv = document.createElement('div');
+            storyDiv.className = 'user-story-fields';
+
+            storyDiv.innerHTML = `
+                <div class="user-story-number"><strong>User Story ${i}<strong></div>
+                <div class="user-story-content">
+                    <div>
+                        <label>Title:</label>
+                        <input type="text" name="story_${i}_title" required>
+                    </div>
+                    <div>
+                        <label>MoSCoW:</label>
+                        <select name="story_${i}_moscow" required>
+                            <option value="">Select</option>
+                            <option value="Must">Must</option>
+                            <option value="Should">Should</option>
+                            <option value="Could">Could</option>
+                            <option value="Won't">Won't</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Assignee:</label>
+                        <select name="story_${i}_assignee" required>
+                        <option value="">Select Team</option>
+                        <option value="Team-1">Team-1</option>
+                        <option value="Team-2">Team-2</option>
+                        <option value="Team-3">Team-3</option>
+                        <option value="Team-4">Team-4</option>
+                    </select>
+                    </div>
+                    <div>
+                        <label>Status:</label>
+                        <select name="story_${i}_status" required>
+                            <option value="">Select</option>
+                            <option value="To Do">To Do</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Done">Done</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Story Points:</label>
+                        <input type="number" name="story_${i}_points" required>
+                    </div>
+                </div>
+                <div>
+
+                        <label>sprint number:</label>
+
+                        <input type="number" name="story_${i}_sprint" required>
+
+                        </div>
+            `;
+            userStoryFieldsContainer.appendChild(storyDiv);
+        }
+    }
+        
+    </script>
+</body>
+</html>

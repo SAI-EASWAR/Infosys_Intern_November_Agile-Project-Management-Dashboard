@@ -1,0 +1,351 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Center the box in the middle of the screen */
+/* body, html {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #8094bc;  
+} */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #6C63FF, #4ADEDE, #FF6584);
+    background-size: 300% 300%;
+    animation: gradient-bg 8s infinite;
+  }
+  
+  /* Gradient Animation */
+  @keyframes gradient-bg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+/* Box styling */
+.login-box {
+    width: 503px;
+    height: 500px;
+    padding: 20px;
+    padding-top: 60px; 
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #333333;
+    text-align: center;
+    position: relative;
+    margin-top: 100px; 
+}
+
+/* Logo container styling */
+.logo-container {
+    position: absolute;
+    top: -60px; 
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    border-radius: 50%;
+    
+}
+
+/* Logo styling */
+.login-logo {
+    width: 100px;
+    height: 100px;
+}
+
+/* Heading */
+.login-box h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Label styling */
+.login-box label {
+    text-align: left;
+    display: block;
+    font-weight: bold;
+    margin: 10px 0 5px;
+    margin-left: 70px;
+    color: #333;
+}
+
+/* Input field styling */
+.login-box input[type="text"],
+.login-box input[type="password"] {
+    width: 70%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+.login-box input[type="email"],
+.login-box input[type="password"] {
+    width: 70%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+/* Forgot Password link styling */
+.forgot-password {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    margin-right: 75px;
+    text-align: right;
+    color: #007bff;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* Button styling */
+.login-box button {
+    width: 50%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.login-box button:hover {
+    background-color: #0056b3;
+}
+
+/* Signup text styling */
+.signup-text {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #333;
+}
+
+.signup-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.signup-link:hover {
+    text-decoration: underline;
+}
+
+
+.error-message {
+    color: #dc3545; 
+    margin: 10px 0;
+    font-size: 0.9rem;
+}
+
+/* Header styling */
+.header {
+    width: 100%;
+    background-color: #20242c; 
+    color: #ffffff;           
+    text-align: center;
+    padding: 15px 0;
+    position: fixed;          
+    top: 0;
+    left: 0;
+    z-index: 10;
+    font-size: 1.5rem;
+    
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+}
+
+/* Dropdown (select) styling */
+.login-box select {
+    width: 73%; /* Matches input field width */
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+    background-color: #ffffff;
+    font-size: 16px;
+}
+
+/* Optional: Change arrow icon for dropdown */
+.login-box select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/*---------------------------------------------
+Forgot Password
+-----------------------------------------------
+*/
+
+/* Forgot Password Box styling */
+.forgot-password-box {
+    width: 503px;
+    padding: 50px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #333333;
+    text-align: center;
+    position: relative;
+    margin: 100px auto; 
+
+}
+
+.forgot-password-box h1 {
+    margin-bottom: 15px;
+    color: #333333;
+}
+
+
+.forgot-password-box p {
+    margin-bottom: 20px;
+    color: #555555;
+}
+
+/* Input field styling */
+.forgot-password-box input[type="email"] {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+
+/* Button styling */
+.forgot-password-box button {
+    width: 50%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+
+.forgot-password-box button:hover {
+    background-color: #0056b3;
+}
+
+/* Back to login link */
+.back-to-login {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.back-to-login a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.back-to-login a:hover {
+    text-decoration: underline;
+}
+
+/* Forgot Password Logo Styling */
+.forgot-password-logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px; 
+}
+
+
+/*---------------------------------------------
+Reset Password
+-----------------------------------------------
+*/
+
+
+
+
+/* Reset Password Box styling */
+.reset-password-box {
+    width: 503px; 
+    padding: 70px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #333333;
+    text-align: center;
+    margin: 100px auto; 
+    position: relative;
+}
+
+/* Logo container styling */
+.reset-logo-container {
+    position: absolute;
+    top: -40px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;  
+    height: 80px; 
+    border-radius: 50%; 
+    background-color: #ffffff; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #ddd; 
+}
+
+/* Logo styling */
+.reset-logo {
+    width: 50px; 
+    height: 50px; 
+}
+
+/* Label styling  */
+.reset-password-box label {
+    text-align: left;
+    display: block;
+    font-weight: bold;
+    margin: 20px 0 5px;
+    margin-left: 55px; 
+    color: #333;
+}
+
+/* Input field styling  */
+.reset-password-box input[type="password"] {
+    width: 70%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+
+/* Button styling  */
+.reset-password-box button {
+    width: 50%; 
+    padding: 10px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.reset-password-box button:hover {
+    background-color: #0056b3;
+}

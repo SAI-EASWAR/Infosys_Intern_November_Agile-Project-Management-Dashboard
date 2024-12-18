@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <title>Page Not Found</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: sans-serif;
+            background-color: #E7FFFF;
+            text-align: center;
+        }
+
+        h1, a {
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .error {
+            font-size: 150px;
+            color: #008B62;
+            text-shadow: 
+                1px 1px 1px #00593E,    
+                2px 2px 1px #00593E,
+                3px 3px 1px #00593E,
+                4px 4px 1px #00593E,
+                5px 5px 1px #00593E,
+                6px 6px 1px #00593E,
+                7px 7px 1px #00593E,
+                8px 8px 1px #00593E,
+                25px 25px 8px rgba(0,0,0, 0.2);
+        }
+
+        .page {
+            margin: 1.5rem 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #444;
+            padding-right: 12px;
+            animation: type .5s alternate infinite;
+        }
+        @keyframes type {
+            from { box-shadow: inset -3px 0px 0px #444; }
+            to { box-shadow: inset -3px 0px 0px transparent; }
+        }
+
+        .back-home {
+            display: inline-block;
+            margin-top: 1rem;
+            border: 2px solid #222;
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s linear;
+            box-shadow: 0 15px 15px -11px rgba(0, 0, 0, 0.4);
+            background: #222;
+            border-radius: 6px;
+        }
+
+        .back-home:hover {
+            background: #333;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1 class="error">404</h1>
+        <div class="page">Ooops!!! The page you are looking for is not found</div>
+        <a class="back-home" href="/">Back to Home</a>
+    </div>
+</body>
+</html>
