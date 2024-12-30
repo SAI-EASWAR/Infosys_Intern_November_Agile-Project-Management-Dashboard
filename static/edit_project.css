@@ -1,10 +1,67 @@
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
-    background-color: #f5f7fa;
+    font-size: 12px;
+    line-height: 1.6;
+	background-attachment:fixed;
+    transition: background-image 0.5s ease-in-out, background-color 0.5s ease-in-out;
+	height: 100vh;
     padding-top: 12vh;
 }
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
 
+:root {
+    --bg-color: #f4f7fc;
+    --text-color: #333;
+    --header-bg: #1a202c;
+    --header-text: #f0f3f5;
+    --stat-bg: white;
+    --stat-border: #ddd;
+    --table-bg: rgb(255, 255, 255);
+    --table-text: #333;
+    --icon-text-color: #333;
+    --form-bg: rgba(219, 208, 208, 0.774);
+    --form-border: rgba(255, 255, 255, 0.644);
+    --form-text: #333;
+    --label-text: #4a5568; /* Label text color */
+    --input-text: #333; /* Input text color */
+    --placeholder-text: #888; /* Placeholder color */
+    background: linear-gradient(260deg, #d4a5b6, #9dbbd4);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+
+[data-theme="dark"] {
+    --bg-color: #252830;
+    --text-color: wheat;
+    --header-bg: #252830;
+    --header-text: wheat;
+    --stat-bg: #21252e;
+    --stat-border: #555;
+    --table-bg: #212938;
+    --table-text: wheat;
+    --icon-text-color: wheat;
+    --form-bg: rgba(34, 34, 34, 0.8); /* Darker background */
+    --form-border: rgba(255, 255, 255, 0.2); /* Lighter border */
+    --form-text: wheat; /* Lighter text */
+    --label-text: wheat; /* Light label text */
+    --input-text: wheat; /* Light input text */
+    --placeholder-text: #aaa; /* Softer placeholder color */
+    background: linear-gradient(260deg, #0F2027, #203A43);
+    background-image: linear-gradient(135deg, #371c50 0%, #234558 100%);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
 /* Header styling */
 #header-content {
     display: flex;
@@ -27,6 +84,7 @@ table {
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    padding-bottom: 5vh;
 }
 
 thead {
@@ -80,26 +138,35 @@ tbody tr:hover {
     background-color: #f1f1f1;
 }
 
-/* Header styling */
-
 /* Align Project Header and Manager Section to the Right */
 .project-header, .project-manager-section {
     text-align: left;
     margin-left: 7px; /* Adds a little space from the edge */
 }
+.form-container > * {
+    margin-right: 20px; /* Adjust the value as needed */
+}
+
+.form-container > *:last-child {
+    margin-bottom: 0; /* Remove margin from the last child */
+}
 
 .form-container {
-    max-width: 700px;
-    margin: 40px auto;
-    padding: 30px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    background: var(--form-bg);
+    border: 1px solid var(--form-border);
+    color: var(--form-text);
+    backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 
+                0 1px 3px rgba(0, 0, 0, 0.1); 
+    max-width: 70%;
+    margin: 20px auto;
+    padding: 25px;
+    border-radius: 20px;
 }
 
 h2 {
     text-align: center;
-    color: #1a202c;
+    /* color: #1a202c; */
     margin-bottom: 25px;
     font-size: 1.6rem;
     font-weight: 700;
@@ -120,30 +187,60 @@ h2 {
 label {
     font-weight: 600;
     margin-bottom: 8px;
-    color: #4a5568;
+    color: var(--label-text); /* Theme-dependent label text color */
+    /* color: #4a5568; */
     display: flex;
     align-items: center;
+    font-size: 1.05rem;
 }
 
 label i {
     margin-right: 10px;
-    color: #4caf50;
+    font-size: 1.1rem;
+    color: var(--label-text); /* Theme-dependent label text color */
+    /* color: #4c63af; */
 }
 
-input, select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #dcdfe4;
-    border-radius: 6px;
-    font-size: 14px;
-    background-color: #f9fafb;
-    transition: border-color 0.3s, box-shadow 0.3s;
+/* Input, Select, and Textarea Styles */
+input, select, textarea {
+    padding: 8px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+
+    /* Theme-dependent styles */
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
 }
 
-input:focus, select:focus {
+/* Placeholder Styles */
+input::placeholder, textarea::placeholder {
+    color: var(--placeholder-text); /* Theme-dependent placeholder color */
+    transition: color 0.3s ease;
+}
+
+/* Focus Styles */
+input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: #4caf50;
-    box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+    border-color: #4a90e2; /* Highlight color on focus */
+    background-color: rgb(223, 248, 250); /* Optional lighter background */
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5); /* Glow effect */
+    color: var(--input-text); /* Ensure text color matches the theme */
+}
+:root {
+    --input-bg: #f9fafb; /* Light theme background */
+    --input-border: #dcdfe4; /* Light theme border */
+    --input-text: #333; /* Light theme text */
+    --placeholder-text: #888; /* Light theme placeholder */
+}
+
+[data-theme="dark"] {
+    --input-bg: #2d2f36; /* Dark theme background */
+    --input-border: #555; /* Dark theme border */
+    --input-text: #f0e68c; /* Dark theme text (wheat) */
+    --placeholder-text: #aaa; /* Dark theme placeholder */
 }
 
 .form-actions {
@@ -214,11 +311,6 @@ button.btn-primary:hover, a.btn-secondary:hover {
     #header-content h1 {
         font-size: 1.5rem;
     }
-
-    #logo {
-        width: 40px;
-        height: 40px;
-    }
 }
 /* ////////////////////////////////////////////////////////////////////////////////////////////////////// */
 /* Container */
@@ -250,7 +342,7 @@ button.btn-primary:hover, a.btn-secondary:hover {
     transition: height 0.5s, width 0.5s;
     transition-delay: 0s, 0.5s;
 
-    background: rgba(243, 237, 237, 0.397); /* Transparent white */
+    background: rgba(225, 235, 227, 0.692);
     backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
     -webkit-backdrop-filter: blur(10px); /* For Safari support */
     border: 1px solid rgba(255, 255, 255, 0.2); /* Semi-transparent border */
@@ -381,90 +473,3 @@ button.btn-primary:hover, a.btn-secondary:hover {
     color: #555;
     transition: transform 0.2s ease, color 0.2s ease; /* Faster transitions */
   }
-
-/* //////////////////////////////////////////////////////////////////////////////////////////////// */
-.theme-toggle {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 25px;
-    margin-left: 15px;
-}
-
-.theme-toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: 0.4s;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 19px;
-    width: 19px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    border-radius: 50%;
-    transition: 0.4s;
-}
-
-input:checked + .slider {
-    background-color: #dfe20a;
-}
-
-input:checked + .slider:before {
-    transform: translateX(25px);
-}
-
-/* Sun and Moon Icons */
-.sun-icon, .moon-icon {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 14px;
-    color: #333;
-    transition: opacity 0.4s, color 0.4s;
-}
-
-.sun-icon {
-    left: 6px;
-    opacity: 1;
-}
-
-.moon-icon {
-    right: 6px;
-    opacity: 0;
-}
-
-input:checked + .slider .sun-icon {
-    opacity: 0;
-}
-
-input:checked + .slider .moon-icon {
-    opacity: 1;
-}
-
-/* In Dark Mode, Update Icon Colors */
-[data-theme="dark"] .sun-icon {
-    color: #fff;
-}
-
-[data-theme="dark"] .moon-icon {
-    color: #000000;
-}

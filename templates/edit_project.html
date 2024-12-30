@@ -11,10 +11,6 @@
 </head>
 <body>
     <header>
-        <div style="display: none;">
-            <ion-icon name="person"></ion-icon>
-            <ion-icon name="log-out"></ion-icon>
-        </div>
         <div class="container">
             <!-- Title -->
             <a href="/" class="back-to-dashboard">
@@ -25,7 +21,7 @@
             <div class="navigation">
                 <div class="user-box">
                     <div class="image-box">
-                        <img src="/static/profile-user.png" alt="avatar">
+                        <img src="{{ session['user_image'] }}" alt="profile">
                     </div>
                     <p class="username">{{ session['user_name'] }}</p>
                 </div>
@@ -66,7 +62,7 @@
             </div>
         </div>
     </header>
-    <section id="edit-project">
+    <!-- <section id="edit-project"> -->
         <div class="form-container">
             <h2>Update Project Details</h2>
             <form action="/project/update/{{ project['ProjectID'] }}" method="POST">
@@ -79,7 +75,6 @@
                     <div class="form-group">
                         <label for="product_owner"><i class="fas fa-user"></i> Product Owner:</label>
                         <select id="product_owner" name="product_owner_id" required>
-                            <option value="">Select Product Owner</option>
                             {% for owner in product_owners %}
                                 <option value="{{ owner.ProductOwnerID }}" {% if owner.ProductOwnerID == project['ProductOwnerID'] %}selected{% endif %}>
                                     {{ owner.Name }}
@@ -104,7 +99,7 @@
                 <!-- Form Row 3 -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="revised_date"><i class="fas fa-calendar"></i> Revised End Date (optional):</label>
+                        <label for="revised_date"><i class="fas fa-calendar"></i> Revised End Date:</label>
                         <input type="date" id="revised_date" name="revised_date" value="{{ project['RevisedEndDate'] }}">
                     </div>
                     <div class="form-group">
@@ -117,6 +112,42 @@
                     </div>
                 </div>
 
+                <!-- <div class="form-row">
+                    <div class="form-group">
+                        <label for="user_story"><i class="fas fa-tasks"></i> User Story:</label>
+                        <textarea id="user_story" name="user_story" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignee"><i class="fas fa-user-check"></i> Assignee:</label>
+                        <select id="assignee" name="assignee" required>
+                            {% for user in users %}
+                                <option value="{{ user.UserID }}">{{ user.UserName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="moscow"><i class="fas fa-star"></i> MoSCoW Priority:</label>
+                        <select id="moscow" name="moscow" required>
+                            <option value="Must Have">Must Have</option>
+                            <option value="Should Have">Should Have</option>
+                            <option value="Could Have">Could Have</option>
+                            <option value="Won't Have">Won't Have</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sprint"><i class="fas fa-running"></i> Sprint:</label>
+                        <select id="sprint" name="sprint" required>
+                            <option value="1">Sprint 1</option>
+                            <option value="2">Sprint 2</option>
+                            <option value="3">Sprint 3</option>
+                            <option value="4">Sprint 4</option>
+                        </select>
+                    </div>
+                </div> -->
+
                 <!-- Action Buttons -->
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
@@ -124,7 +155,44 @@
                 </div>
             </form>
         </div>
-    </section>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const themeSwitch = document.getElementById("theme-switch");
+                const htmlElement = document.documentElement;
+        
+                // Load and apply saved theme
+                const savedTheme = localStorage.getItem("theme") || "light";
+                htmlElement.setAttribute("data-theme", savedTheme);
+                themeSwitch.checked = savedTheme === "dark";
+        
+                // Toggle theme on switch change
+                themeSwitch.addEventListener("change", () => {
+                    const newTheme = themeSwitch.checked ? "dark" : "light";
+                    htmlElement.setAttribute("data-theme", newTheme);
+                    localStorage.setItem("theme", newTheme);
+                });
+            });
+        </script> 
+    <!-- </section> -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; Agile Project Management. All rights reserved 2024</p>
+        </div>
+        <style>
+            footer {
+                background-color: black;
+                color: #fff;
+                text-align: center; 
+                position: fixed;
+                width: 100%;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+                font-size: 12px;
+                justify-content: center;
+                left: 0;
+                bottom: 0; 
+            }
+        </style>
+    </footer>
 
 </body>
 </html>

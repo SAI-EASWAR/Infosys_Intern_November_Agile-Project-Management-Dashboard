@@ -5,23 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> <!-- Optional CSS for styling -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container">
-        <h1 class="my-4">Admin Dashboard</h1>
-
+        <header class="header">
+            <div id="header-content">
+                <a href="{{ url_for('login') }}" class="back-to-login">
+                    <i class="material-icons" style="vertical-align: middle;">arrow_back</i>
+                    Back to Login
+                </a>
+                <h1 id="title_text">Admin Dashboard</h1>
+            </div>
+            <a href="{{ url_for('admin_index') }}" class="btn btn-primary" style="position: absolute; top: 10px; right: 10px;">
+                View Recent Activity
+            </a>
+            <style>
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                }
+                .container {
+                    padding-bottom: 5vh; 
+                }
+                #header-content {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 100%;
+                    margin-bottom: 20px;
+                }
+                #title_text {
+                    flex-grow: 1;
+                    text-align: center;
+                }
+                .back-to-login {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: 0.7rem 1.5rem;
+                    border-radius: 25px;
+                    background-color: #2d3748;
+                    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.5);
+                    transition: transform 0.2s ease, background-color 0.2s ease;
+                }
+                .back-to-login:hover {
+                    background-color: #4a5568;
+                    transform: scale(1.03);
+                }
+                .back-to-login:active {
+                    background-color: #2c3e50;
+                    transform: scale(1);
+                }
+            </style>
+        </header>
+        
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="alert alert-info">
                     {% for category, message in messages %}
-                        <li>{{ message }}</li>
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     {% endfor %}
                 </ul>
             {% endif %}
         {% endwith %}
-
         <!-- Users Table -->
         <table class="table table-bordered">
             <thead>
@@ -52,8 +107,26 @@
             </tbody>
         </table>
     </div>
-    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; Agile Project Management. All rights reserved 2024</p>
+        </div>
+        <div class="designer-credit">
+        </div>
+        <style>
+            footer {
+                background-color: black;
+                color: #fff;
+                text-align: center;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+                font-size: 12px;
+            }
+        </style>
+    </footer>
 </body>
 </html>

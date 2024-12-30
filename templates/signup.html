@@ -7,7 +7,6 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ url_for('static', filename='login_module.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='signup.css') }}">
-    
 </head>
 <body>
     <header class="header">
@@ -15,26 +14,59 @@
     </header>
     <div class="signup-container">
         <div class="signup-card">
+            {% if get_flashed_messages() %}
+                <div class="flash-messages">
+                        <p>{{ get_flashed_messages()[-1] }}</p>
+                        <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+                </div>
+            {% endif %}
             <h2>Signup</h2>
             <form method="POST" action="{{ url_for('signup') }}">
                 <label for="username">User Name</label>
                 <input type="text" id="username" name="username" placeholder="Enter User Name" required>
-
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="Enter your email" required>
-
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Enter your password" required>
-
                 <label for="confirm_password">Confirm Password</label>
                 <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter your password" required>
-
                 <button type="submit">Signup</button>
             </form>
             <p class="login-link">
-                Already have an account? <a href="{{ url_for('login') }}">Login</a>
+                Already have an account? <a href="{{ url_for('login') }}" class="login-text">Login</a>
             </p>
         </div>
     </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; Agile Project Management. All rights reserved 2024</p>
+        </div>
+        <div class="designer-credit">
+        </div>
+        <style>
+            footer {
+                background-color: black;
+                color: #fff;
+                text-align: center;
+                padding: 10px 20px;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+                font-size: 12px;
+            }
+            .footer-content {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 20px;
+                flex-wrap: wrap;
+                text-align: center;
+            }
+        </style>
+    </footer>
 </body>
 </html>

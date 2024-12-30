@@ -1,34 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, g, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from werkzeug.security import generate_password_hash
 from send_email import send_email
+from schedular import check_deadlines_and_notify
+from send_otp import send_email_with_otp
 from itsdangerous import URLSafeTimedSerializer
-from flask_migrate import Migrate
-from sqlalchemy.exc import IntegrityError
 import sqlite3
 from functools import wraps
-
-import datetime
-import matplotlib.pyplot as plt
-import io
-import base64
+from datetime import datetime
+import time
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'  # Set your secret key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///agile_dashboard.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 serializer = URLSafeTimedSerializer(app.secret_key)
-
-# Initialize SQLAlchemy
-db = SQLAlchemy(app)
-
-# Initialize Flask-Migrate
-migrate = Migrate(app, db)
-
-# Database setup (SQLite)
+sender_email = "ankitaisadoctor@gmail.com"
+sender_password = "ihkskbdmdlitzbbh"
 DATABASE = 'projects.db'
 
 # Function to get database connection 
@@ -39,6 +25,7 @@ def get_db():
         db.row_factory = sqlite3.Row
         db.execute('PRAGMA journal_mode=WAL;')  # Enable WAL mode
     return db
+
 def table_exists(table_name):
     db = get_db()
     try:
@@ -59,16 +46,6 @@ def set_user_role():
     # Default role to 'user' if not already set
     session['user_role'] = session.get('user_role', 'user')
     session['user_name'] = session.get('user_name', 'Guest')
-
-# Models for SQLAlchemy
-class User(db.Model):
-    __tablename__ = 'users'
-    UserID = db.Column(db.Integer, primary_key=True)
-    UserName = db.Column(db.String(150), unique=True, nullable=False)
-    Email = db.Column(db.String(150), unique=True, nullable=False)
-    Password = db.Column(db.String(150), nullable=False)
-    Role = db.Column(db.String(50), nullable=False)
-    ApprovalStatus = db.Column(db.String(10), default='No')
 
 def login_required(f):
     @wraps(f)
@@ -96,7 +73,6 @@ def profile():
         if not user_id:
             return redirect(url_for('login'))
         if request.method == 'POST':
-            # Fetch form data
             new_email = request.form['email']
             new_password = request.form['password']
             updated_fields = []
@@ -121,11 +97,25 @@ def profile():
                 flash(f"{', '.join(updated_fields)} updated successfully!", 'profile')
             else:
                 flash("No changes were made.", 'profile')
+                
         # Fetch user data for rendering the profile
         user_data = db.execute(
-            "SELECT UserName, Email, Password FROM Users WHERE UserID = ?",
+            'SELECT * FROM Users WHERE UserID = ?;',
             (user_id,)
         ).fetchone()
+        
+        projects = db.execute(
+            '''
+            SELECT * 
+            FROM ProjectInfo 
+            WHERE ProjectID IN (
+                SELECT ProjectID 
+                FROM ProjectTeamMembers 
+                WHERE UserID = ?
+            );
+            ''',
+            (user_id,)
+        ).fetchall()
 
         if not user_data:
             flash('User not found.', 'profile')
@@ -136,7 +126,7 @@ def profile():
             "email": user_data['Email'],
             "password": user_data['Password']
         }
-        return render_template('profile.html', user=user)
+        return render_template('profile.html', user=user, user_data=user_data, projects=projects)
     except Exception as e:
         print(f"Error: {e}")
         flash('An error occurred while updating the profile.', 'profile')
@@ -149,11 +139,10 @@ def dashboard():
     db = get_db()
     user_role = session.get('user_role', 'user')
     user_name = session.get('user_name', 'Guest')
-
+    user_image = session.get('user_image', '/static/images/profile-user.png') 
     total_projects = db.execute('SELECT COUNT(*) FROM ProjectInfo').fetchone()[0]
     active_projects = db.execute("SELECT COUNT(*) FROM ProjectInfo WHERE Status = 'Active'").fetchone()[0]
     on_hold_projects = db.execute("SELECT COUNT(*) FROM ProjectInfo WHERE Status = 'On Hold'").fetchone()[0]
-    
     stats = {"total_projects": total_projects, "active_projects": active_projects, "on_hold_projects": on_hold_projects}
     # Fetch all projects with ProductOwner name using JOIN
     projects = db.execute(''' 
@@ -161,7 +150,6 @@ def dashboard():
         FROM ProjectInfo p
         JOIN ProductOwner po ON p.ProductOwnerID = po.ProductOwnerID
     ''').fetchall()
-
     return render_template('dashboard.html', user_role=user_role, projects=projects, stats=stats)
 
 @app.route('/project/<int:project_id>')
@@ -178,113 +166,113 @@ def project_overview(project_id):
     if project:
         # Fetch sprints for the project
         sprints = db.execute('SELECT s.*, SUM(us.StoryPoints) AS TotalStoryPoints FROM Sprints s JOIN UserStories us ON s.SprintID = us.SprintID WHERE s.ProjectID = ? GROUP BY s.SprintID;', (project_id,)).fetchall()
-        
-        # Fetch user stories with UserName from Users table
         user_stories = db.execute(''' 
-            SELECT us.UserStory, us.Status, us.Assignee, us.SprintId, u.UserName, us.Moscow, us.StoryPoints
+            SELECT us.UserStoriesID, us.UserStory, us.Status, us.Assignee, us.SprintID, u.UserName, 
+                us.Moscow, us.StoryPoints, s.SprintNo
             FROM UserStories us
             LEFT JOIN Users u ON us.Assignee = u.UserID
+            LEFT JOIN Sprints s ON us.SprintID = s.SprintID
             WHERE us.ProjectID = ?
         ''', (project_id,)).fetchall()
         product_owner = db.execute(''' 
             SELECT * FROM ProductOwner WHERE ProductOwnerID = ?;
         ''', (project[2],)).fetchone()
         users = db.execute('SELECT UserID, UserName FROM Users').fetchall()
+        user_role = session.get('user_role', 'user')
         # Pass the ProductOwnerName along with other data
-        return render_template('project_overview.html', product_owner=product_owner, project=project, sprints=sprints, user_stories=user_stories, users=users)
+        return render_template('project_overview.html', product_owner=product_owner, project=project, sprints=sprints, user_stories=user_stories, users=users, user_role=user_role)
     else:
         return "Project not found", 404
 
 # /////////////////////////////////////  Login  ///////////////////////////////////////////////////////////
+recent_login_activities = []
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     db = get_db()
     if request.method == 'POST':
-        # Get user input
         email = request.form['email']
         password = request.form['password']
-
-        # Admin Login
-        if email == 'admin@email.com' and password == 'password123':
-            print("Admin logged in")
-            session['logged_in'] = True
-            session['user_role'] = 'admin'
-            return redirect(url_for('admin_dashboard'))
+        ip_address = request.remote_addr
 
         # Query the Users table to verify login credentials
         user = db.execute('SELECT * FROM Users WHERE Email=?', (email,)).fetchone()
-        if user and user['Password'] == password:
+        if user and user['Password'] == password and user['ApprovalStatus']=='Yes':
+            image_data = db.execute("SELECT ImagePath FROM Users WHERE UserName = ?", (user[1],)).fetchone()
+            image_path = image_data[0] if image_data else '/static/images/default.png'
             # Save user session data
             session['user_id'] = user['UserID']  # Save UserID in session
             session['user_name'] = user['UserName']  # Save UserName
-            session['logged_in'] = True
-
+            session['user_image'] = image_path
+            session['user_role'] = user['Role']
+            session['logged_in'] = False  # Mark user as fully logged in
             # Determine role
-            role = None
-            if db.execute('SELECT * FROM ProductOwner WHERE Email=?', (email,)).fetchone():
-                role = 'product_owner'
-            elif db.execute('SELECT * FROM ScrumMasters WHERE Email=?', (email,)).fetchone():
-                role = 'scrum_master'
-            else:
-                role = 'user'
-            session['user_role'] = role
-
-            flash('Login successful!', 'success')
+            role = user['Role']
+            if user['Role'] == 'admin':
+                session['logged_in'] = True
+                return redirect(url_for('admin_dashboard'))
+            # flash('Login successful!', 'success')
+            print(role)
+            try:
+                otp = send_email_with_otp(sender_email, sender_password, email)
+                # Save OTP and its generation time in session
+                session['otp'] = otp
+                session['otp_time'] = time.time()  # Store OTP generation timestamp
+                print(f"OTP: {otp}")
+                # flash('An OTP has been sent to your email. Please verify to complete login.', 'info')
+                return redirect(url_for('verify_otp'))  # Redirect to OTP verification page
+            except Exception as e:
+                flash(f'Failed to send OTP: {e}', 'danger')
+                return redirect(url_for('login'))
             return redirect(url_for('dashboard'))  # Redirect to dashboard
         else:
+            recent_login_activities.append({
+                'username': email,
+                'ip': ip_address,
+                'status': 'Failed',
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
             flash('Invalid username or password', 'danger')
             return redirect(url_for('login'))
     return render_template('login.html')
 
-# Route to display the login form
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     db = get_db()
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         role = request.form.get('role') 
-#         if not role:
-#             flash('Please select a role!', 'danger')
-#             return redirect(url_for('login'))
-#         # Query the database for the user
-#         user = db.execute('SELECT * FROM Users WHERE UserName=?', (username,)).fetchone()
-#         if user['Password'] == password:
-#             flash('Login successful!', 'success')
-#             session['user_role'] = role
-#             session['user_name'] = username
-#             session['logged_in'] = True
-#             return redirect(url_for('dashboard'))
-#         else:
-#             flash('Invalid username or password', 'danger')
-#             return redirect(url_for('login'))
-#     return render_template('login.html')
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+    if request.method == 'POST':
+        user_otp = request.form['otp']  
+        generated_otp = session.get('otp') 
+        otp_time = session.get('otp_time') 
+        # Validate OTP and check expiration (5 minutes = 300 seconds)
+        if generated_otp and user_otp == generated_otp and time.time() - otp_time <= 300:
+            session['logged_in'] = True  # Mark user as fully logged in
+            ip_address = request.remote_addr
+            recent_login_activities.append({
+                'username':session['user_name'],
+                'ip': ip_address,
+                'status': 'Success',
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid or expired OTP. Please try again.', 'danger')
+            return redirect(url_for('login'))  # Redirect back to login
+    return render_template('otp.html')
+
+@app.route('/admin_index')
+@login_required
+def admin_index():
+    return render_template('admin_index.html', recent_activities=recent_login_activities)
 
 @app.route('/forgotpassword', methods=['GET', 'POST'])
 def forgotpassword():
-    #email = request.form.get('email', '').strip()#
-    #print(email)
     if request.method == 'POST':
-        email = request.form.get('email', '').strip()
-        #print(email)
-        # Check if email exists in the database
-        # user = User.query.filter_by(Email=email).first()
-        # if not user:
-        #     flash("Email address not found.", "danger")
-        #     return redirect(url_for('forgotpassword'))
-
-         # Generate token valid for 15 minutes (900 seconds)
+        email = request.form['email'] 
         token = serializer.dumps(email, salt='password-reset-salt')
-
-        # Generate the reset link with the token
-        reset_link = url_for('reset_password', token=token, _external=True)
-        # Email details
-        sender_email = "ankitaisadoctor@gmail.com"
-        sender_password = "ihkskbdmdlitzbbh"  # Use an app password if using Gmail
-       # receiver_email = "aayushaayush438@gmail.com"
+        reset_link = url_for('reset_password', token=token, _external=True)  
         subject = "Password Reset Request"
         body = f"Dear User,\n\nClick the link below to reset your password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email."
         try:
+            # send_email("aryashreejha16@gmail.com", "xpvn pwwz hiep ddaz", email, subject, body)
             send_email(sender_email, sender_password, email, subject, body)
             flash('Email sent successfully!', 'success')
         except Exception as e:
@@ -294,152 +282,118 @@ def forgotpassword():
         
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    
     try:
-        # Validate token (expires in 900 seconds = 15 minutes)
         email = serializer.loads(token, salt='password-reset-salt', max_age=900)
     except Exception as e:
         flash('The reset link is invalid or has expired.', 'danger')
         return redirect(url_for('forgotpassword'))
-
-
     if request.method == 'POST':
+            db = get_db()
             new_password = request.form['new-password']
             confirm_password = request.form['confirm-password']
-            # Check if passwords match
             if new_password != confirm_password:
                 flash("Passwords do not match. Please try again.", "danger")
                 return redirect(url_for('reset_password', token=token))
-
-
-            # Here, you should hash the new password and update the user's password in the database
-            #flash('Your password has been updated successfully!', 'success')
-            #return redirect(url_for('reset_password'))
-    #return render_template('reset_password.html', token=token)
-            # Hash the new password before storing it
             hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
-
-            #Update the user's password in the database
-            user = User.query.filter_by(Email=email).first()#changes 
-            user.Password = hashed_password
-            db.session.commit()
+            db.execute("UPDATE Users SET Password = ? WHERE Email = ?", (new_password, email))
+            db.commit()
             flash('Your password has been updated successfully!', 'success')
             return redirect(url_for('login'))
     return render_template('reset_password.html', token=token)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    db = get_db()
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
-
-        # Check if the username or email already exists
-        existing_user = User.query.filter_by(UserName=username).first()
+        # Check if username or email already exists using raw SQL
+        existing_user = db.execute(
+            "SELECT * FROM Users WHERE UserName = :username", {"username": username}
+        ).fetchone()
         if existing_user:
             flash('Username already taken', 'danger')
+            print("User already exists")
             return redirect(url_for('signup'))
-        
-        existing_email = User.query.filter_by(Email=email).first()
+
+        existing_email = db.execute(
+            "SELECT * FROM Users WHERE Email = :email", {"email": email}
+        ).fetchone()
         if existing_email:
             flash('Email already in use', 'danger')
+            print("Email already exists")
             return redirect(url_for('signup'))
-
         if password != confirm_password:
             flash('Passwords do not match', 'danger')
+            print("Passwords do not match")
             return redirect(url_for('signup'))
-        
-        # Hash the password before saving it to the database
+        # Hash the password
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-         # Set the default role to 'User' (or any appropriate role)
-        role = 'User'
-        new_user = User(
-            UserName=username,
-            Email=email,
-            Password=password,
-            Role=role,  # Ensure the role is assigned
-            ApprovalStatus='No'   # User is not approved initially
-        )
-
+        # Insert the new user using raw SQL
         try:
-            db.session.add(new_user)
-            db.session.commit()
+            result = db.execute("SELECT MAX(UserID) AS max_id FROM Users").fetchone()
+            next_user_id = (result['max_id'] or 0) + 1  # Increment max UserID or start from 1 if table is empty
+            print(result['max_id'])
+            db.execute(
+                """
+                INSERT INTO Users (UserID, UserName, Email, Password, Role, ApprovalStatus)
+                VALUES (:userid, :username, :email, :password, :role, :approval_status)
+                """,
+                {
+                    "userid": next_user_id,
+                    "username": username,
+                    "email": email,
+                    "password": password,
+                    "role": "user",
+                    "approval_status": "No"
+                }
+            )
+            db.commit()
             flash('Account created. Awaiting approval.', 'success')
+            print('Account created. Awaiting approval.')
             return redirect(url_for('login'))
-        except IntegrityError:
-            db.session.rollback()
+        except Exception as e:
+            db.rollback()
             flash('An error occurred. Please try again.', 'danger')
-
     return render_template('signup.html')
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_dashboard():
+    db = get_db()
     if request.method == 'POST':
-        user_id = request.form.get('user_id')  # Get the user ID from the hidden field
+        user_id = request.form.get('user_id')  # Get the user ID from the form
         action = request.form.get('action')    # Get the action (approve or reject)
-
-        # Fetch the user by ID
-        user = User.query.get(user_id)
+        # Fetch the user by ID using a raw SQL query
+        user = db.execute(
+            "SELECT * FROM Users WHERE UserID = ?", (user_id,)
+        ).fetchone()
         if user:
-            if action == 'approve':
-                user.ApprovalStatus = 'Yes'  # Set approval status to Yes
-                db = get_db()
-                db.execute(
-                    """
-                    INSERT INTO Users (UserID, UserName, Password, Email) 
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (user.UserID, user.UserName, user.Password, user.Email)
-                    )
-                db.commit()
-            elif action == 'reject':
-                user.ApprovalStatus = 'No'   # Set approval status to No
             try:
+                if action == 'approve':
+                    # Approve user by updating ApprovalStatus
+                    db.execute(
+                        "UPDATE Users SET ApprovalStatus = 'Yes' WHERE UserID = ?",
+                        (user_id,)
+                    )
+                    flash(f"User {user['UserName']} approved successfully.", 'success')
+
+                elif action == 'reject':
+                    # Reject user by updating ApprovalStatus
+                    db.execute(
+                        "UPDATE Users SET ApprovalStatus = 'No' WHERE UserID = ?",
+                        (user_id,)
+                    )
+                    flash(f"User {user['UserName']} rejected successfully.", 'success')
                 db.commit()  # Commit the changes to the database
-                flash(f"User {action}d successfully.", 'success')
             except Exception as e:
-                db.session.rollback()  # Rollback if an error occurs
+                db.rollback()  # Rollback changes if any error occurs
                 flash(f"Error: {e}", 'danger')
-
         return redirect(url_for('admin_dashboard'))
-
-    users = User.query.all()  # Fetch all users to display
+    # Fetch all users using a raw SQL query
+    users = db.execute("SELECT * FROM Users").fetchall()
     return render_template('admin_dashboard.html', users=users)
-
-# Submit user data route
-@app.route('/submit', methods=['POST'])
-def submit_user():
-    data = request.json  # Assuming you are sending data as JSON
-
-    # Extract values from the request
-    username = data.get('username')
-    password = data.get('password')
-    email = data.get('email')
-    role = data.get('role')
-    approved = data.get('approved')
-
-    # Check if the username or email already exists
-    existing_user = User.query.filter_by(UserName=username).first()
-    if existing_user:
-        return jsonify({"message": "Username already exists!"}), 400
-
-    existing_email = User.query.filter_by(Email=email).first()
-    if existing_email:
-        return jsonify({"message": "Email already in use!"}), 400
-
-    # Create a new user record
-    new_user = User(username=username, password=password, email=email, role=role, ApprovalStatus=approved)
-
-    try:
-        # Add to the database
-        db.session.add(new_user)
-        db.session.commit()
-
-        return jsonify({"message": "User data submitted successfully!"}), 200
-    except IntegrityError as e:
-        db.session.rollback()  # Rollback the transaction in case of an error
-        return jsonify({"message": f"An error occurred: {str(e)}"}), 500
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -647,7 +601,7 @@ def edit_project(project_id):
         JOIN ProductOwner po ON p.ProductOwnerID = po.ProductOwnerID
         WHERE p.ProjectID = ?;
     ''', (project_id,)).fetchone()
-
+    users = db.execute('SELECT UserID, UserName FROM Users').fetchall()
     if project:
         if request.method == 'POST':
             # Retrieve form data
@@ -672,9 +626,10 @@ def edit_project(project_id):
         # Fetch the list of available product owners for the select dropdown (assuming you have multiple owners)
         product_owners = db.execute('SELECT ProductOwnerID, Name FROM ProductOwner').fetchall()
         
-        return render_template('edit_project.html', project=project, product_owners=product_owners)
+        return render_template('edit_project.html', project=project, product_owners=product_owners, users=users)
     else:
         return "Project not found", 404
+
 @app.route('/project/update/<int:project_id>', methods=['POST'])
 @login_required
 def update_project(project_id):
@@ -699,6 +654,7 @@ def update_project(project_id):
     
     # Redirect to the project overview page after updating
     return redirect(url_for('project_overview', project_id=project_id))
+
 @app.route('/project/update_user_story/<int:project_id>', methods=['POST'])
 @login_required
 def update_user_story(project_id):
@@ -720,17 +676,34 @@ def update_user_story(project_id):
     
     db.commit()
     return redirect(url_for('project_overview', project_id=project_id))
+
+@app.route('/update_user_story/<int:user_story_id>', methods=['POST'])
+@login_required
+def update_user_story_dropdown(user_story_id):
+    db = get_db()
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'No data provided'}), 400
+    print(data)
+    field = data.get('field')
+    value = data.get('value')
+    if(field=='sprint'):
+        query = f"UPDATE Sprints SET SprintNo = ? WHERE SprintID = (SELECT SprintID FROM UserStories WHERE UserStoriesID = ?)"
+    else:
+        query = f"UPDATE UserStories SET {field} = ? WHERE UserStoriesID = ?"
+    db.execute(query, (value, user_story_id))
+    db.commit()
+    return redirect(url_for('project_overview'))
+
 @app.route('/create_project', methods=['GET', 'POST'])
 @login_required
 def create_project():
     db = get_db()
-
     # Check if required tables exist
     required_tables = ['ProjectInfo', 'Sprints', 'UserStories', 'ScrumMasters', 'ProductOwner', 'Users']
     missing_tables = [table for table in required_tables if not table_exists(table)]
     if missing_tables:
         return f"The following tables are missing from the database: {', '.join(missing_tables)}", 500
-
     # Fetch Scrum Masters and Product Owners to display in the dropdown
     scrum_masters = db.execute('SELECT ScrumMasterID, Email FROM ScrumMasters').fetchall()
     product_owners = db.execute('SELECT ProductOwnerID, Name FROM ProductOwner').fetchall()
@@ -745,32 +718,47 @@ def create_project():
             end_date = request.form.get('EndDate')
             revised_end_date = request.form.get('RevisedEndDate')
             status = request.form.get('Status')
-
             # Determine the next ProjectID
             cur = db.execute("SELECT MAX(ProjectID) FROM ProjectInfo")
             result = cur.fetchone()
             next_project_id = result[0] + 1 if result[0] is not None else 1
-
             # Insert the project into ProjectInfo
             db.execute('''
                 INSERT INTO ProjectInfo (ProjectID, ProjectName, ProductOwnerID, StartDate, EndDate, RevisedEndDate, Status)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (next_project_id, project_name, product_owner_id, start_date, end_date, revised_end_date, status))
-
             # Insert selected team members into the junction table
             team_member_ids = request.form.getlist('TeamMembers')  # Get the list of selected team members
-            
             # Ensure that we are passing one row for each member
             for member_id in team_member_ids:
                 db.execute('''
                     INSERT INTO ProjectTeamMembers (ProjectID, UserID)
                     VALUES (?, ?)
                 ''', (next_project_id, member_id))
+            # Fetch Emails of Team Members
+            team_emails = db.execute('''
+                SELECT Email FROM Users WHERE UserID IN ({})
+            '''.format(','.join(['?'] * len(team_member_ids))), team_member_ids).fetchall()
+            # Send Email
+            subject = f"You've been assigned to a new project: {project_name}"
+            for email in team_emails:
+                email_body = f"""
+                Dear Team Member,
+                
+                You have been assigned to a new project: {project_name}.
+                
+                Project Start Date: {start_date}
+                Project End Date: {end_date}
 
+                Please log in to the dashboard for further details.
+
+                Best regards,
+                Agile Project Dashboard
+                """
+                # send_email("aryashreejha16@gmail.com", "xpvn pwwz hiep ddaz", email[0], subject, email_body)
+                send_email(sender_email, sender_password, email[0], subject, email_body)
 
             db.commit()
-
-            # Save sprint data
             sprint_count = int(request.form.get('sprint_count', 0))
             for i in range(1, sprint_count + 1):
                 sprint_start = request.form.get(f'sprint_{i}_start_date')
@@ -831,12 +819,68 @@ def create_project():
             return str(ve), 400
         finally:
             db.commit()
-
-        # Redirect to dashboard after creating the project
         return redirect(url_for('dashboard'))
-
-    # Render the form with Scrum Masters and Product Owners data
     return render_template('form.html', scrum_masters=scrum_masters, product_owners=product_owners, team_members=team_members)
+
+@app.route('/add_user_story/<int:project_id>', methods=['GET', 'POST'])
+@login_required
+def add_user_story(project_id):
+    db = get_db()
+
+    # Fetch project details
+    project = db.execute('''
+        SELECT p.ProjectID, p.ProjectName, p.ProductOwnerID, p.StartDate, p.EndDate, p.RevisedEndDate, p.Status, po.Name
+        FROM ProjectInfo p
+        JOIN ProductOwner po ON p.ProductOwnerID = po.ProductOwnerID
+        WHERE p.ProjectID = ?;
+    ''', (project_id,)).fetchone()
+
+    if not project:
+        return jsonify({"error": "Project not found."}), 404
+
+    if request.method == 'POST':
+        story_name = request.form.get('story_name')
+        status = request.form.get('status')
+        assignee = request.form.get('assignee')
+        moscow = request.form.get('moscow')
+        sprint = request.form.get('sprint')
+
+        if not story_name or not sprint:
+            return jsonify({"error": "User Story and Sprint are required."}), 400
+
+        # Retrieve SprintID for the selected SprintNo
+        sprint_row = db.execute('''
+            SELECT SprintID, SprintNo FROM Sprints
+            WHERE SprintNo = ? AND ProjectID = ?;
+        ''', (sprint, project_id)).fetchone()
+
+        if not sprint_row:
+            return jsonify({"error": f"Sprint {sprint} is invalid for the current project."}), 400
+
+        sprint_id = sprint_row['SprintID']
+
+        # Get the next available User Story ID
+        user_story_result = db.execute("SELECT MAX(UserStoriesID) FROM UserStories").fetchone()
+        next_user_story_id = user_story_result[0] + 1 if user_story_result[0] is not None else 1
+
+        db.execute('''
+            INSERT INTO UserStories (UserStoriesID, ProjectID, UserStory, Moscow, Assignee, Status, SprintID)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        ''', (next_user_story_id, project_id, story_name, moscow, assignee, status, sprint_id))
+        db.commit()
+
+        return jsonify({"success": "User story added successfully!"}), 200
+
+    # Fetch all sprints for the given project
+    sprints = db.execute('''
+        SELECT SprintID, SprintNo FROM Sprints WHERE ProjectID = ?;
+    ''', (project_id,)).fetchall()
+
+    return render_template(
+        'project_overview.html',
+        project=project,
+        sprints=sprints['SprintNo']
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

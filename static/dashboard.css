@@ -94,21 +94,24 @@ header h1 {
 
 /* Styling for different stat types */
 .total-projects {
-    background: linear-gradient(145deg, #3da0f150, #076cc47c);
+    /* background: linear-gradient(145deg, #3da0f150, #076cc47c); */
+    background: linear-gradient(145deg, #3da0f1e7, #076cc4d5);
     border-radius: 25px;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.281);
     backdrop-filter: blur(5px);
 }
 
 .active-projects {
-    background: linear-gradient(145deg, #5fbe6280, #31863580);
+    /* background: linear-gradient(145deg, #5fbe6280, #31863580); */
+    background: linear-gradient(145deg, #5fbe62d7, #2e9b33d8);
     border-radius: 25px;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(5px);
 }
 
 .on-hold-projects {
-    background: linear-gradient(145deg, #ff99007a, #e6560983);
+    /* background: linear-gradient(145deg, #ff99007a, #e6560983); */
+    background: linear-gradient(145deg, #ff9900fb, #e45a10d3);
     border-radius: 25px;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(5px);
@@ -134,12 +137,22 @@ header h1 {
     backdrop-filter: blur(1px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    padding-bottom: 7vh;
 }
 [data-theme="dark"] #projects-table {
     background: rgba(54, 52, 52, 0.384);
     color: wheat;
 }
 
+#projects-table input, #projects-table select {
+    background-color: white;
+    border-radius: 8px;
+}
+[data-theme="dark"] #projects-table input, #projects-table select {
+    background-color: white;
+    color: black;
+    border-radius: 8px;
+}
 #projects-table h2 {
     display: flex;
     align-items: center;
@@ -147,30 +160,27 @@ header h1 {
     font-size: 1.5rem;
     color: #333;
     border-bottom: 2px solid #ccc;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 #add-project-button {
-    background-color: rgba(41, 180, 46, 0.822);
+    background-color: rgba(40, 187, 45, 0.822);
     color: white;
     border: none;
     padding: 10px 15px;
-    border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     border-radius: 1rem;
-    backdrop-filter: blur(1px);
     text-decoration: none;
+    transition: background-color 0.1s ease;
 }
-
 #add-project-button i {
     margin-right: 5px;
 }
 #add-project-button:hover {
-    background-color: #45a049;
+    background-color: #327936;
 }
 
 table {
@@ -250,22 +260,6 @@ tbody tr:hover {
     font-size: 13px;
 }
 
-/* .status-active {
-    background-color: #7dec81; 
-    font-family: 'Roboto', sans-serif;
-    color: #037503
-}
-
-.status-hold {
-    background-color: #e7af5b; 
-    font-family: 'Roboto', sans-serif;
-    color: #5c3d0e
-}
-.status-completed {
-    background-color: #7bf0f0; 
-    font-family: 'Roboto', sans-serif;
-    color: #10415e
-} */
 .status-active {
     background-color: #7bf0f0; 
     font-family: 'Roboto', sans-serif;
@@ -478,7 +472,7 @@ select[disabled], input[readonly] {
     transition: height 0.5s, width 0.5s;
     transition-delay: 0s, 0.5s;
 
-    background: rgba(243, 237, 237, 0.397); /* Transparent white */
+    background: rgba(225, 235, 227, 0.692); /* Transparent white */
     backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
     -webkit-backdrop-filter: blur(10px); /* For Safari support */
     border: 1px solid rgba(255, 255, 255, 0.2); /* Semi-transparent border */
@@ -495,7 +489,6 @@ select[disabled], input[readonly] {
     display: flex;
     align-items: center;
     overflow: hidden;
-    transition: 0.4s;
   }
   
   .navigation .user-box .username {
@@ -608,3 +601,13 @@ select[disabled], input[readonly] {
     color: #555;
     transition: transform 0.2s ease, color 0.2s ease; /* Faster transitions */
   }
+
+  .header-logo {
+    width: 50px; /* Adjust size */
+    height: 50px;
+    object-fit: cover; /* Ensures image scales properly */
+    border-radius: 50%; /* Makes it circular */
+    margin-right: 15px; /* Adds spacing */
+    border: 2px solid #ffffff; /* Optional: white border */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Adds a slight shadow */
+}

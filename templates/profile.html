@@ -8,22 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <style>
-        .password-container {
-            display: flex;
-            align-items: center;
-        }
-        .password-container .icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            margin-left: 10px;
-            padding: 0;
-        }
-        .password-container .icon-btn:focus {
-            outline: none;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -35,115 +19,159 @@
             <h1>User Profile</h1>
         </div>
     </header>
-<!-- Flash Message Display for Profile Page Only -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            {% if category == 'profile' %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-{% endwith %}
+    <!-- Flash Message Display for Profile Page Only -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'profile' %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-<div class="container">    
-    <div class="main-body">
-        <div class="row gutters-sm">
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-column align-items-center text-center">
-                            <img src="/static/profile-user.png" alt="Admin" class="rounded-circle" width="150">
-                            <div class="mt-3">
-                                <h4>{{ user.name }}</h4>
+    <div class="container">    
+        <div class="main-body">
+            <div class="row gutters-sm">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex flex-column align-items-center text-center">
+                                <img src="{{ session['user_image'] }}" alt="Profile" class="rounded-circle" width="140">
+                                <div class="mt-3">
+                                    <h4>{{ user.name }}</h4>
+                                    <h6>{{ user_data.Role.replace('_', ' ').title() }}</h6>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-8">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <form method="POST" action="{{ url_for('profile') }}">
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <h6 class="mb-0">Full Name</h6>
+                <div class="col-md-8">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('profile') }}">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Full Name</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        {{ user.name }}
+                                    </div>
                                 </div>
-                                <div class="col-sm-9 text-secondary">
-                                    {{ user.name }}
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Email</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <input 
+                                            type="email" 
+                                            class="form-control" 
+                                            name="email" 
+                                            value="{{ user.email }}" 
+                                            required 
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <h6 class="mb-0">Email</h6>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Password</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <input 
+                                            type="password" 
+                                            class="form-control" 
+                                            name="password" 
+                                            placeholder="Enter new password" 
+                                        />
+                                    </div>
                                 </div>
-                                <div class="col-sm-9 text-secondary">
-                                    <input 
-                                        type="email" 
-                                        class="form-control" 
-                                        name="email" 
-                                        value="{{ user.email }}" 
-                                        required 
-                                    />
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <button type="submit" class="btn btn-success">Save Changes</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <h6 class="mb-0">Password</h6>
-                                </div>
-                                <div class="col-sm-9 text-secondary">
-                                    <input 
-                                        type="password" 
-                                        class="form-control" 
-                                        name="password" 
-                                        placeholder="Enter new password" 
-                                    />
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <button type="submit" class="btn btn-success">Save Changes</button>
-                                </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
+                <div class="col-md-12 mt-4 projects-section">
+                    <h4 class="mb-3">Your Projects</h4>
+                    <div class="row">
+                        {% for project in projects %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card project-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ project.ProjectName }}</h5>
+                                    <p class="card-text">
+                                        <strong>Start Date:</strong> {{ project.StartDate }}<br>
+                                        <strong>End Date:</strong> {{ project.EndDate }}<br>
+                                        <strong>Status:</strong> {{ project.Status }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+            
+            
             </div>
         </div>
     </div>
-</div>
-<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const passwordField = document.getElementById("passwordField");
-    const togglePassword = document.getElementById("togglePassword");
-    const toggleIcon = document.getElementById("toggleIcon");
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const passwordField = document.getElementById("passwordField");
+        const togglePassword = document.getElementById("togglePassword");
+        const toggleIcon = document.getElementById("toggleIcon");
 
-    togglePassword.addEventListener("mousedown", () => {
-        passwordField.type = "text";
-        toggleIcon.classList.remove("fa-eye");
-        toggleIcon.classList.add("fa-eye-slash");
-    });
+        togglePassword.addEventListener("mousedown", () => {
+            passwordField.type = "text";
+            toggleIcon.classList.remove("fa-eye");
+            toggleIcon.classList.add("fa-eye-slash");
+        });
 
-    togglePassword.addEventListener("mouseup", () => {
-        passwordField.type = "password";
-        toggleIcon.classList.remove("fa-eye-slash");
-        toggleIcon.classList.add("fa-eye");
-    });
+        togglePassword.addEventListener("mouseup", () => {
+            passwordField.type = "password";
+            toggleIcon.classList.remove("fa-eye-slash");
+            toggleIcon.classList.add("fa-eye");
+        });
 
-    togglePassword.addEventListener("mouseleave", () => {
-        passwordField.type = "password";
-        toggleIcon.classList.remove("fa-eye-slash");
-        toggleIcon.classList.add("fa-eye");
-    });
-</script>
+        togglePassword.addEventListener("mouseleave", () => {
+            passwordField.type = "password";
+            toggleIcon.classList.remove("fa-eye-slash");
+            toggleIcon.classList.add("fa-eye");
+        });
+    </script>
+    
+    <footer>
+        <div class="footer-content">
+            <p>&copy; Agile Project Management. All rights reserved 2024</p>
+        </div>
+        <style>
+            footer {
+                background-color: black;
+                color: #fff;
+                text-align: center;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+                font-size: 12px;
+                justify-content: center;
+                height: 20px;
+                left: 0; 
+            }
+        </style>
+    </footer>
 </body>
 </html>

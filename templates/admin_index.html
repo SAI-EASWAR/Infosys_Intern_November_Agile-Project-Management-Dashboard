@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <title>Login Activity Logs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding-bottom: 5vh;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .filters {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #search, #filter-status {
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('admin_dashboard') }}" class="back-to-login">
+        <i class="material-icons" style="vertical-align: middle;">arrow_back</i>
+        Back to Admin Dashboard
+    </a>
+    <div class="container">
+        <h1>Login Activity Logs</h1>
+        <div class="filters">
+            <input type="text" id="search" placeholder="Search username or IP" />
+            <select id="filter-status">
+                <option value="">All</option>
+                <option value="success">Success</option>
+                <option value="failed">Failed</option>
+            </select>
+        </div>
+
+        <table id="log-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Username</th>
+                    <th>IP Address</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_activities %}
+                    {% for activity in recent_activities %}
+                    <tr>
+                        <td>{{ activity.timestamp }}</td>
+                        <td>{{ activity.username }}</td>
+                        <td>{{ activity.ip }}</td>
+                        <td>{{ activity.status }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No recent activity found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let originalLogs = []; // Store the original logs
+        // Function to initialize the logs from the current table data
+        function initializeLogs() {
+            const tableRows = document.querySelectorAll('#log-table tbody tr');
+            originalLogs = []; // Reset logs
+            tableRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                // Ignore rows that are empty or have colspan="4" (like the "No logs found" row)
+                if (cells.length === 4 && !row.querySelector('[colspan="4"]')) {
+                    originalLogs.push({
+                        date: cells[0].textContent.trim(),
+                        username: cells[1].textContent.trim(),
+                        ip: cells[2].textContent.trim(),
+                        status: cells[3].textContent.trim().toLowerCase(), // Normalize status to lowercase
+                    });
+                }
+            });
+    
+            console.log('Original Logs Initialized:', originalLogs);  // For debugging
+        }
+        // Function to fetch logs and apply filtering
+        function fetchLogs() {
+            // Initialize the logs if they haven't been loaded already
+            if (originalLogs.length === 0) {
+                initializeLogs();
+            }
+            const searchQuery = document.getElementById('search').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value.toLowerCase(); // Normalize to lowercase
+            // Filter the logs based on search query and status
+            let filteredLogs = originalLogs;
+            // Filter by search query
+            if (searchQuery) {
+                filteredLogs = filteredLogs.filter(log =>
+                    log.username.toLowerCase().includes(searchQuery) ||
+                    log.ip.includes(searchQuery)
+                );
+            }
+            // Filter by status (normalize status to lowercase)
+            if (statusFilter && statusFilter !== 'all') {
+                filteredLogs = filteredLogs.filter(log => log.status === statusFilter);
+            }
+            // Render the filtered logs
+            renderLogs(filteredLogs);
+        }
+        // Function to render the logs in the table
+        function renderLogs(logs) {
+            const tableBody = document.querySelector('#log-table tbody');
+            tableBody.innerHTML = ''; // Clear the table body
+            // If no logs found, display a message
+            if (logs.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="4" style="text-align: center;">No logs found</td>`;
+                tableBody.appendChild(row);
+                return;
+            }
+            // Render the filtered logs
+            logs.forEach(log => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${log.date}</td>
+                    <td>${log.username}</td>
+                    <td>${log.ip}</td>
+                    <td>${log.status.charAt(0).toUpperCase() + log.status.slice(1)}</td> <!-- Capitalize first letter -->
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        // Event listeners for filtering and searching
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the logs on page load
+            initializeLogs();
+            // Event listeners for input changes
+            document.getElementById('search').addEventListener('input', fetchLogs);
+            document.getElementById('filter-status').addEventListener('change', fetchLogs);
+        });
+    </script>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; Agile Project Management. All rights reserved 2024</p>
+        </div>
+        <style>
+            footer {
+                background-color: black;
+                color: #fff;
+                text-align: center;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+                font-size: 12px;
+                justify-content: center;
+                left: 0; 
+            }
+        </style>
+    </footer>
+</body>
+</html>

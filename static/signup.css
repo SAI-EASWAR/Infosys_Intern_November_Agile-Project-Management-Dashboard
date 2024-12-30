@@ -11,6 +11,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 400px;
+    border: 2px solid #333333;
 }
 .icon-circle {
     background-color: #E0E0E0;
@@ -55,4 +56,10 @@ button:hover {
 }
 .login-link {
     margin-top: 20px;
+}
+
+.login-text {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
 }

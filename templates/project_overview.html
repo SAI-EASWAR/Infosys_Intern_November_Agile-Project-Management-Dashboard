@@ -16,10 +16,6 @@
 <body>
     <!-- Header Section -->
     <header>
-        <div style="display: none;">
-            <ion-icon name="person"></ion-icon>
-            <ion-icon name="log-out"></ion-icon>
-        </div>
         <div class="container">
             <!-- Title -->
             <a href="/" class="back-to-dashboard">
@@ -30,7 +26,7 @@
             <div class="navigation">
                 <div class="user-box">
                     <div class="image-box">
-                        <img src="/static/profile-user.png" alt="avatar">
+                        <img src="{{ session['user_image'] }}" alt="profile">
                     </div>
                     <p class="username">{{ session['user_name'] }}</p>
                 </div>
@@ -104,7 +100,14 @@
 
             <!-- User Stories Table -->
             <section id="user-stories">
-                <h2><i class="fas fa-tasks"></i> User Stories</h2>
+                <div class="user-stories-header">
+                    <h2><i class="fas fa-tasks"></i> User Stories</h2>
+                    {% if user_role in ['product_owner', 'scrum_master'] %}
+                        <span class="addBtn" id="add-user-story-btn">
+                            <i class="fa fa-plus"></i>
+                        </span>
+                    {% endif %}
+                </div>
                 <form action="{{ url_for('update_user_story', project_id=project.ProjectID) }}" method="POST">
                     <table>
                         <thead>
@@ -118,49 +121,206 @@
                         </thead>
                         <tbody>
                             {% for story in user_stories %}
-                            <tr class="status-row" data-status="{{ story.Status }}">
+                            <tr class="status-row" data-status="{{ story.Status }}" data-user-story-id="{{ story.UserStoriesID }}">
                                 <td class="user-story-column">{{ story.UserStory }}</td>
-                                <!-- Status Cell with Dropdown -->
+                                <!-- Status Cell -->
                                 <td>
+                                    {% if user_role in ['product_owner', 'scrum_master'] %}
                                     <select name="status_{{ story.UserStoryID }}" class="status-dropdown">
                                         <option value="In Progress" {% if story.Status == 'In Progress' %}selected{% endif %}>In Progress</option>
                                         <option value="Completed" {% if story.Status == 'Completed' %}selected{% endif %}>Completed</option>
                                         <option value="Not Started" {% if story.Status == 'Not Started' %}selected{% endif %}>Not Started</option>
                                         <option value="On Hold" {% if story.Status == 'On Hold' %}selected{% endif %}>On Hold</option>
                                     </select>
+                                    {% else %}
+                                    {{ story.Status }}
+                                    {% endif %}
                                 </td>
+                                <!-- Assignee Cell -->
                                 <td>
-                                    <select class="assignee-dropdown" data-story-id="{{ story.UserStoryID }}">
+                                    {% if user_role in ['product_owner', 'scrum_master'] %}
+                                    <select class="assignee-dropdown" name="assignee_{{ story.UserStoryID }}">
                                         {% for user in users %}
                                             <option value="{{ user.UserID }}" {% if story.Assignee == user.UserID %}selected{% endif %}>{{ user.UserName }}</option>
                                         {% endfor %}
                                     </select>
+                                    {% else %}
+                                    {{ users | selectattr("UserID", "equalto", story.Assignee) | map(attribute="UserName") | list | first }}
+                                    {% endif %}
                                 </td>
+                                <!-- MoSCoW Cell -->
                                 <td>
+                                    {% if user_role in ['product_owner', 'scrum_master'] %}
                                     <select name="moscow_{{ story.UserStoryID }}" class="moscow-dropdown">
                                         <option value="M" {% if story.Moscow == 'M' %}selected{% endif %}>M</option>
                                         <option value="S" {% if story.Moscow == 'S' %}selected{% endif %}>S</option>
                                         <option value="C" {% if story.Moscow == 'C' %}selected{% endif %}>C</option>
                                         <option value="W" {% if story.Moscow == 'W' %}selected{% endif %}>W</option>
                                     </select>
+                                    {% else %}
+                                    {{ story.Moscow }}
+                                    {% endif %}
                                 </td>
-                                <!-- Sprint Dropdown -->
+                                <!-- Sprint Cell -->
                                 <td>
-                                    {% for sprint in sprints %}
-                                        {% if sprint.SprintID is not number %}
-                                            <input type="number" class="sprint-input" value="" min="1" max="1000">
-                                        {% elif sprint.SprintID == story.SprintId %}
-                                            <input type="number" class="sprint-input" value="{{ sprint.SprintID }}" min="1" max="1000">
-                                        {% endif %}
-                                    {% endfor %}
+                                    {% if user_role in ['product_owner', 'scrum_master'] %}
+                                    <input type="number" name="sprint_{{ story.UserStoryID }}" class="sprint-input" value="{{ story.SprintNo }}" min="1" max="1000">
+                                    {% else %}
+                                    {{ story.SprintNo }}
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
-                        </tbody>                    
-                    </table>
+                        </tbody>
+                    </table>                    
                 </form>
             </section>
             
+            <!-- Modal -->
+            <div id="popup-modal" class="modal">
+                <div class="modal-content">
+                    <h3>Add New User Story</h3>
+
+                    <!-- User Story -->
+                    <div class="form-group">
+                        <label for="story-name">User Story:</label>
+                        <input type="text" id="story-name" name="story_name" placeholder="Enter User Story" required />
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <select id="status" name="status">
+                            <option value="Not Started">Not Started</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="On Hold">On Hold</option>
+                        </select>
+                    </div>
+
+                    <!-- Assignee -->
+                    <div class="form-group">
+                        <label for="assignee">Assignee:</label>
+                        <select id="assignee" name="assignee">
+                            {% for user in users %}
+                            <option value="{{ user.UserID }}">{{ user.UserName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- MoSCoW -->
+                    <div class="form-group">
+                        <label for="moscow">MoSCoW:</label>
+                        <select id="moscow" name="moscow">
+                            <option value="M">M</option>
+                            <option value="S">S</option>
+                            <option value="C">C</option>
+                            <option value="W">W</option>
+                        </select>
+                    </div>
+
+                    <!-- Sprint -->
+                    <div class="form-group">
+                        <label for="sprint">Sprint:</label>
+                        <select id="sprint" name="sprint" required>
+                            <option value="">Select Sprint</option>
+                            {% for sprint in sprints %}
+                            <option value="{{ sprint.SprintNo }}">{{ sprint.SprintNo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Project ID -->
+                    <input type="hidden" id="project-id" name="project_id" value="{{ project.ProjectID }}">
+
+                    <!-- Buttons -->
+                    <div class="modal-buttons">
+                        <button id="submit-story-btn" class="btn-primary">Submit</button>
+                        <button id="close-popup" class="btn-secondary">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Modal Elements
+                const addBtn = document.getElementById("add-user-story-btn");
+                const modal = document.getElementById("popup-modal");
+                const closePopup = document.getElementById("close-popup");
+                const submitStoryBtn = document.getElementById("submit-story-btn");
+
+                // Form Inputs
+                const projectID = document.getElementById("project-id").value;
+                const storyName = document.getElementById("story-name");
+                const status = document.getElementById("status");
+                const assignee = document.getElementById("assignee");
+                const moscow = document.getElementById("moscow");
+                const sprint = document.getElementById("sprint");
+
+                // Open Modal
+                addBtn?.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    modal.style.display = "flex";
+                });
+
+                // Close Modal
+                closePopup.addEventListener("click", () => {
+                    modal.style.display = "none";
+                    clearInputs();
+                });
+
+                // Submit Story
+                submitStoryBtn.addEventListener("click", async (event) => {
+                    event.preventDefault();
+
+                    // Validation
+                    if (!storyName.value.trim() || !sprint.value.trim()) {
+                        alert("Please fill out all required fields.");
+                        return;
+                    }
+
+                    // Get the selected SprintNo
+                    const sprintNo = sprint.value;  // Use Sprint No instead of Sprint ID
+
+                    // Prepare the data to be sent to the backend
+                    const formData = new FormData();
+                    formData.append("project_id", projectID);
+                    formData.append("story_name", storyName.value.trim());
+                    formData.append("status", status.value);
+                    formData.append("assignee", assignee.value);
+                    formData.append("moscow", moscow.value);
+                    formData.append("sprint", sprintNo);  // Send Sprint No instead of Sprint ID
+
+                    try {
+                        // Send a POST request to the backend
+                        const response = await fetch(`/add_user_story/${projectID}`, {
+                            method: "POST",
+                            body: formData,
+                        });
+
+                        // Handle the response from the backend
+                        const result = await response.json();
+                        if (response.ok) {
+                            alert(result.success);
+                            location.reload(); // Reload the page to reflect changes
+                        } else {
+                            alert(result.error);
+                        }
+                    } catch (error) {
+                        console.error("Error:", error);
+                        alert("An error occurred while adding the user story. Please try again.");
+                    }
+                });
+
+                // Helper Function to Clear Inputs
+                function clearInputs() {
+                    storyName.value = "";
+                    status.selectedIndex = 0;
+                    assignee.selectedIndex = 0;
+                    moscow.selectedIndex = 0;
+                    sprint.value = "";
+                }
+            </script>
+
             <!-- Sprint Calendar Section -->
             <section id="sprint-calendar">
                 <h2><i class="fas fa-calendar-alt"></i> Sprint Calendar</h2>
@@ -192,6 +352,7 @@
                         </tr>
                         {% endfor %}
                     </tbody>
+                     <!-- Plus Button -->
                     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -217,6 +378,7 @@
                 </table>
             </section>
         </div>
+        
         <div id="right-section">
             <!-- Chart Section -->
             <div id="chart-container">
@@ -226,37 +388,37 @@
                     <!-- <div id="chart" style="width: auto; height: auto; border: 1px dashed #ccc; align-items: center; justify-content: center;"> -->
                         <div id="charts-section">
                             <!-- Donut Chart -->
-                            <div class="chart-container">
+                            <div class="chart-container chart-donut">
                                 <h4>Donut Chart</h4>
                                 <i class="expand-icon fas fa-expand" title="Expand"></i>
                                 <canvas id="donutChart" width="60" height="60"></canvas>
                             </div>
                             <!-- Burnup Chart -->
-                            <div class="chart-container">
+                            <div class="chart-container chart-burnup">
                                 <h4>Burnup Chart</h4>
                                 <i class="expand-icon fas fa-expand" title="Expand"></i>
                                 <canvas id="burnupChart" width="60" height="60"></canvas>
                             </div class="chart-container">
                             <!-- Velocity Chart -->
-                            <div class="chart-container">
+                            <div class="chart-container chart-velocity">
                                 <h4>Velocity Chart</h4>
                                 <i class="expand-icon fas fa-expand" title="Expand"></i>
                                 <canvas id="velocityChart" width="60" height="60"></canvas>
                             </div class="chart-container">
                             <!-- Burndown Chart -->
-                            <div class="chart-container">
+                            <div class="chart-container chart-burndown">
                                 <h4>Burndown Chart</h4>
                                 <i class="expand-icon fas fa-expand" title="Expand"></i>
                                 <canvas id="burndownChart" width="60" height="60"></canvas>
                             </div>
                             <!-- User Progress Chart -->
-                            <div class="chart-container">
+                            <div class="chart-container chart-user-progress">
                                 <h4>User Progress Chart</h4>
                                 <i class="expand-icon fas fa-expand" title="Expand"></i>
                                 <canvas id="userProgressChart" width="60" height="60"></canvas>
                             </div>
                             <!-- User Ranking Chart -->
-                            <div class="chart-container">
+                            <div class="chart-container chart-user-ranking">
                                 <h4>User Ranking Chart</h4>
                                 <i class="expand-icon fas fa-expand" title="Expand"></i>
                                 <canvas id="userRankingChart" width="60" height="60"></canvas>
@@ -360,41 +522,123 @@
     </script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Function to change row color based on the status
-            function updateRowColor(row) {
-                const status = row.querySelector('.status-dropdown').value.toLowerCase();
-                if (status === 'in progress') {
+        document.addEventListener("DOMContentLoaded", function () {
+        // Function to change row color based on the status
+        function updateRowColor(row) {
+            // Get the status either from the dropdown or the data attribute
+            const dropdown = row.querySelector('.status-dropdown');
+            const status = dropdown ? dropdown.value.toLowerCase() : row.dataset.status.toLowerCase();
+
+            // Update the row color based on the status
+            switch (status) {
+                case 'in progress':
                     row.style.backgroundColor = '#7bf0f0';
                     row.style.color = '#10415e';
-                } else if (status === 'completed') {
+                    break;
+                case 'completed':
                     row.style.backgroundColor = '#7dec81';
                     row.style.color = '#037503';
-                } else if (status === 'on hold') {
+                    break;
+                case 'on hold':
                     row.style.backgroundColor = '#e7af5b';
                     row.style.color = '#5c3d0e';
-                } else if (status === 'not started') {
+                    break;
+                case 'not started':
                     row.style.backgroundColor = '#f04f6a';
                     row.style.color = '#5c131f';
-                } else {
+                    break;
+                default:
                     row.style.backgroundColor = ''; // Default
-                }
+                    row.style.color = ''; // Reset color
             }
-            const rows = document.querySelectorAll('.status-row');
-            rows.forEach(function(row) {
-                updateRowColor(row); // Initial color setting on page load
-            });
-            const statusDropdowns = document.querySelectorAll('.status-dropdown');
-            statusDropdowns.forEach(function(dropdown) {
-                dropdown.addEventListener('change', function() {
-                    const row = dropdown.closest('tr'); // Get the row that the dropdown is in
-                    updateRowColor(row); // Update row color when dropdown value changes
-                });
+        }
+
+        // Select all rows
+        const rows = document.querySelectorAll('.status-row');
+        rows.forEach(function (row) {
+            updateRowColor(row); // Initial color setting on page load
+        });
+
+        // Add event listeners to dropdowns, if present
+        const statusDropdowns = document.querySelectorAll('.status-dropdown');
+        statusDropdowns.forEach(function (dropdown) {
+            dropdown.addEventListener('change', function () {
+                const row = dropdown.closest('tr'); // Get the row that the dropdown is in
+                updateRowColor(row); // Update row color when dropdown value changes
             });
         });
+
+        // Debugging Log
+        console.log("Script executed: Rows initialized with status colors.");
+    });
     </script>
 
-    <!-- /////////////////////////////////////////////////////////////////////// -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        // Function to update database for any user story field
+        function updateUserStoryInDatabase(userStoryId, field, value) {
+            fetch(`/update_user_story/${userStoryId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ field: field, value: value }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log(`${field} updated successfully for User Story ID ${userStoryId}`);
+                    } else {
+                        console.error(`Error updating ${field}:`, data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            console.log(JSON.stringify({ field: field, value: value }));
+        }
+
+        // Add change event listeners for dropdowns and inputs
+        const rows = document.querySelectorAll('.status-row');
+        rows.forEach(row => {
+            const userStoryId = row.dataset.userStoryId;
+            
+            // Event listener for Status dropdown
+            const statusDropdown = row.querySelector('.status-dropdown');
+            if (statusDropdown) {
+                statusDropdown.addEventListener('change', function () {
+                    updateUserStoryInDatabase(userStoryId, 'status', statusDropdown.value);
+                });
+            }
+
+            // Event listener for Assignee dropdown
+            const assigneeDropdown = row.querySelector('.assignee-dropdown');
+            if (assigneeDropdown) {
+                assigneeDropdown.addEventListener('change', function () {
+                    updateUserStoryInDatabase(userStoryId, 'assignee', assigneeDropdown.value);
+                });
+            }
+
+            // Event listener for MoSCoW dropdown
+            const moscowDropdown = row.querySelector('.moscow-dropdown');
+            if (moscowDropdown) {
+                moscowDropdown.addEventListener('change', function () {
+                    updateUserStoryInDatabase(userStoryId, 'moscow', moscowDropdown.value);
+                });
+            }
+
+            // Event listener for Sprint input
+            const sprintInput = row.querySelector('.sprint-input');
+            if (sprintInput) {
+                sprintInput.addEventListener('change', function () {
+                    updateUserStoryInDatabase(userStoryId, 'sprint', sprintInput.value);
+                });
+            }
+        });
+    
+    });
+    </script>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // Function to render the Donut Chart
@@ -427,15 +671,6 @@
                     }
                 });
             }
-
-            // Fetch data for donut chart (replace with dynamic project ID if needed)
-            fetch('/chart-data/donut/${projectId}')  // Replace with dynamic project ID
-                .then(response => response.json())
-                .then(data => {
-                    renderDonutChart(data);  // Pass the data to the chart rendering function
-                })
-                .catch(error => console.error('Error fetching data: ', error));
-
 
             // Fetch and render Burnup Chart
             function renderBurnupChart(data) {
@@ -684,5 +919,24 @@
         });
     });
     </script>
+    
+    <footer>
+        <div class="footer-content">
+            <p>&copy; Agile Project Management. All rights reserved 2024</p>
+        </div>
+        <style>
+            .footer-content {
+                background-color: black;
+                color: #fff;
+                text-align: center;
+                bottom: 0;
+                width: 100%;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+                font-size: 12px;
+                justify-content: center;
+                left: 0; 
+            }
+        </style>
+    </footer>
 </body>
 </html>
